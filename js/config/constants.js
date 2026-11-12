@@ -9,9 +9,7 @@ const SEKOLAH_DATA = {
     nama: "SMAN 5 Surabaya",
     alamat: "Jl. Kusuma Bangsa No.21, Ketabang, Kec. Genteng, Surabaya",
     lat: -7.25747,
-    lng: 112.75023,
-    jamMasuk: "06:30 WIB",
-    toleransiKeterlambatan: "06:15 WIB"
+    lng: 112.75023
 };
 
 // 2. Kredensial Administrator / Developer Sistem
@@ -33,11 +31,7 @@ const TRANSPORTASI_UMUM = [
         nama: "Halte Feeder SMAN 5 / Kusuma Bangsa",
         trayek: "FD01 (Terminal Joyoboyo - Kenjeran Park)",
         lat: -7.2570,
-        lng: 112.7506,
-        jarakKeSekolah: "50 meter (1 menit jalan kaki)",
-        tarif: "Gratis untuk Pelajar / Rp 2.500 Umum",
-        jadwalInterval: "Setiap 10 - 15 Menit",
-        info: "Halte terdekat tepat di seberang gerbang utama SMAN 5 Surabaya"
+        lng: 112.7506
     },
     {
         id: "TP-02",
@@ -45,11 +39,7 @@ const TRANSPORTASI_UMUM = [
         nama: "Halte Feeder Grand City Mall",
         trayek: "FD07 & FD01",
         lat: -7.2618,
-        lng: 112.7525,
-        jarakKeSekolah: "450 meter (5 menit jalan kaki)",
-        tarif: "Gratis untuk Pelajar / Rp 2.500 Umum",
-        jadwalInterval: "Setiap 10 Menit",
-        info: "Titik transit strategis penghubung rute Surabaya Timur dan Pusat"
+        lng: 112.7525
     },
     {
         id: "TP-03",
@@ -57,11 +47,7 @@ const TRANSPORTASI_UMUM = [
         nama: "Halte Suroboyo Bus Pemuda / Monkasel",
         trayek: "Koridor 1 (Terminal Purabaya - Rajawali)",
         lat: -7.2655,
-        lng: 112.7460,
-        jarakKeSekolah: "800 meter (9 menit jalan kaki via Jl. Wijaya Kusuma)",
-        tarif: "Rp 2.500 (Pelajar / QRIS)",
-        jadwalInterval: "Setiap 12 Menit",
-        info: "Bisa bayar menggunakan botol plastik atau e-money / QRIS"
+        lng: 112.7460
     },
     {
         id: "TP-04",
@@ -69,11 +55,7 @@ const TRANSPORTASI_UMUM = [
         nama: "Stasiun Kereta Surabaya Gubeng",
         trayek: "Komuter Sidoarjo - Surabaya - Indro / Lamongan",
         lat: -7.26532,
-        lng: 112.75269,
-        jarakKeSekolah: "850 meter (10 menit jalan kaki)",
-        tarif: "Mulai Rp 4.000 (Tiket KAI Commuter)",
-        jadwalInterval: "Pagi: 05:45, 06:10, 06:35 WIB",
-        info: "Sangat praktis untuk siswa dari Sidoarjo, Gedangan, atau Waru"
+        lng: 112.75269
     }
 ];
 

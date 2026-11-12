@@ -63,10 +63,7 @@ const MapView = {
             .bindPopup(`
                 <div style="font-size:13px; line-height:1.4;">
                     <b style="color:#d97706; font-size:14px;">🏫 ${SEKOLAH_DATA.nama}</b><br>
-                    <span style="color:#64748b;">${SEKOLAH_DATA.alamat}</span><br>
-                    <hr style="margin:6px 0; border:0; border-top:1px solid #e2e8f0;">
-                    ⏰ <b>Jam Masuk:</b> ${SEKOLAH_DATA.jamMasuk}<br>
-                    ⚠️ <b>Batas Aman:</b> ${SEKOLAH_DATA.toleransiKeterlambatan}
+                    <span style="color:#64748b;">${SEKOLAH_DATA.alamat}</span>
                 </div>
             `);
     },
@@ -136,14 +133,9 @@ const MapView = {
 
             const marker = L.marker([tp.lat, tp.lng], { icon: icon });
             marker.bindPopup(`
-                <div style="font-size:12px; line-height:1.4; min-width:210px;">
+                <div style="font-size:12px; line-height:1.4; min-width:180px;">
                     <b style="color:#6d28d9; font-size:13px;">${emoji} ${tp.nama}</b><br>
                     <span style="color:#475569; font-weight:600;">${tp.trayek}</span>
-                    <hr style="margin:6px 0; border:0; border-top:1px solid #e2e8f0;">
-                    🚶 <b>Ke SMAN 5:</b> ${tp.jarakKeSekolah}<br>
-                    🎫 <b>Tarif:</b> ${tp.tarif}<br>
-                    ⏱️ <b>Jadwal:</b> ${tp.jadwalInterval}<br>
-                    <p style="margin-top:6px; font-style:italic; color:#64748b;">${tp.info}</p>
                 </div>
             `);
             this.transportMarkersLayer.addLayer(marker);

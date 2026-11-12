@@ -64,14 +64,6 @@ const DashboardModule = {
                         </span>
                     </div>
                     <div style="font-size:12px; color:#64748b; margin-top:4px;">${tp.trayek}</div>
-                    <div style="font-size:12px; margin-top:8px; line-height:1.5;">
-                        🚶 <b>Jarak ke Gerbang SMAN 5:</b> ${tp.jarakKeSekolah}<br>
-                        🎫 <b>Tarif:</b> ${tp.tarif}<br>
-                        ⏱️ <b>Jadwal:</b> ${tp.jadwalInterval}
-                    </div>
-                    <div style="margin-top:10px; padding:6px; background:#f8fafc; border-radius:6px; font-size:11px; color:#475569; font-style:italic;">
-                        💡 ${tp.info}
-                    </div>
                 </div>
             `;
         });
