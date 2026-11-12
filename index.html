@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="id">    
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Memutus identitas pelacakan agar server peta CartoDB / OSM tidak memblokir localhost -->
+    <meta name="referrer" content="no-referrer">
+    
+    <title>BusBuddy SMAN 5 Surabaya - Platform Nebeng & Transportasi Pelajar</title>
+    
+    <!-- Library Peta Leaflet.js via Cloudflare CDN (Gratis & Bebas Blokir) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+    
+    <!-- File Styling Desain Web BusBuddy -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ==============================================================================
+         0. LAYAR GERBANG AUTH FULLSCREEN (WAJIB LOGIN / SIGN IN SEBELUM LIHAT PETA)
+         ============================================================================== -->
+    <div class="auth-gatekeeper" id="authGatekeeper">
+        <div class="auth-card">
+            <!-- Header Kartu Auth -->
+            <div class="auth-header">
+                <div class="auth-header-icon">🚌</div>
+                <h2 style="font-size:20px; font-weight:700; margin-bottom:4px;">BusBuddy version 2.0</h2>
+                <p style="font-size:12px; opacity:0.9;">Sistem Nebeng Pelajar & Integrasi Transportasi Publik</p>
+                <div style="margin-top:10px; display:inline-block; background:rgba(255,255,255,0.15); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;">
+                    🏫 Jl. Kusuma Bangsa No.21, Surabaya
+                </div>
+            </div>
+
+            <!-- Tab Menu Auth: 2 Tab Saja — Masuk dan Daftar -->
+            <div class="auth-tabs">
+                <button class="auth-tab-btn active" id="authTabBtn_login" onclick="App.switchAuthTab('login')">
+                    🔑 Login
+                </button>
+                <button class="auth-tab-btn" id="authTabBtn_daftar" onclick="App.switchAuthTab('daftar')">
+                    📝 Daftar
+                </button>
+            </div>
+
+            <!-- Konten Kartu Auth -->
+            <div class="auth-body">
+
+                <!-- PANEL 1: LOGIN TUNGGAL (SISWA, GURU, DAN DEVELOPER DALAM 1 FORM) -->
+                <div class="auth-panel" id="authPanel_login">
+                    <form onsubmit="App.handleUnifiedLogin(event)">
+                        <div class="form-group">
+                            <label class="form-label">Masukkan Nomor Identitas :</label>
+                            <input type="text" id="loginIdentifier" class="form-input" 
+                                   placeholder="Masukkan NISN, NIP, atau username developer" 
+                                   oninput="App.onLoginIdentifierChange(this.value)" required />
+                            <div id="loginPassHint" style="font-size:11px; color:#64748b; margin-top:5px;">
+                                <i>Format kata sandi: <b>smala</b> + 5 digit terakhir nomor identitas</i>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Kata Sandi :</label>
+                            <input type="password" id="loginPassword" class="form-input" 
+                                   placeholder="Contoh: smala34567" required />
+                        </div>
+
+                        <!-- Fitur Pengingat Login (Remember Me Auto-fill) -->
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:12px; color:#475569;">
+                            <input type="checkbox" id="rememberMeCheckbox" style="cursor:pointer;" />
+                            <label for="rememberMeCheckbox" style="cursor:pointer; user-select:none;">
+                                💾 Ingat identitas saya di perangkat ini (Auto-fill saat buka web)
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;">
+                            🚀 Masuk ke BusBuddy
+                        </button>
+                    </form>
+
+                    <div style="text-align:center; margin-top:16px; font-size:12px; color:#64748b;">
+                        Belum memiliki akun terdaftar? 
+                        <a href="javascript:void(0)" onclick="App.switchAuthTab('daftar')" style="color:#2563eb; font-weight:700; text-decoration:none;">
+                            Daftar di sini
+                        </a>
+                    </div>
+                </div>
+
+
+                <div class="auth-panel" id="authPanel_daftar" style="display:none;">
+
+                    <form onsubmit="App.handleUnifiedRegistration(event)">
+
+                        <!-- HONEYPOT TRAP (Perangkap Bot Tersembunyi) -->
+                        <input type="text" id="regHoneypot" style="display:none !important;" tabindex="-1" autocomplete="off" />
+
+                        <!-- PILIHAN PERAN -->
+                        <div class="form-group">
+                            <label class="form-label">Daftar Sebagai:</label>
+                            <select id="regPeran" class="form-select" onchange="App.onRegRoleChange(this.value)">
+                                <option value="siswa">🎒 Siswa</option>
+                                <option value="guru">👨‍🏫 Guru</option>
+                            </select>
+                        </div>
+
+                        <!-- NAMA LENGKAP -->
+                        <div class="form-group">
+                            <label class="form-label">Nama Lengkap:</label>
+                            <input type="text" id="regNama" class="form-input" placeholder="Nama lengkap" required />
+                        </div>
+
+                        <!-- NOMOR IDENTITAS (NISN / NIP) — label berubah via JS -->
+                        <div class="form-group">
+                            <label class="form-label" id="labelRegIdentifier">Nomor Induk Siswa Nasional (NISN):</label>
+                            <input type="text" id="regIdentifier" class="form-input" 
+                                   placeholder="Contoh: 0061234567" 
+                                   oninput="App.onRegIdentifierChange(this.value)" required />
+                            <div id="regPassPreview" style="font-size:11px; color:#64748b; margin-top:4px;">
+                                <i>Masukkan minimal 5 digit nomor identitas</i>
+                            </div>
+                        </div>
+
+                        <!-- FIELD KHUSUS SISWA: Kelas & Absen -->
+                        <div id="rowSiswaFields" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div class="form-group">
+                                <label class="form-label">Kelas:</label>
+                                <input type="text" id="regKelas" class="form-input" placeholder="Contoh: XI-MIPA 3" />
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nomor Absen:</label>
+                                <input type="number" id="regAbsen" class="form-input" placeholder="1 – 36" min="1" max="45" />
+                            </div>
+                        </div>
+
+                        <!-- FIELD KHUSUS GURU: Jabatan/Mapel -->
+                        <div id="rowGuruFields" style="display:none;">
+                            <div class="form-group">
+                                <label class="form-label">Mata Pelajaran / Jabatan:</label>
+                                <input type="text" id="regJabatan" class="form-input" placeholder="Contoh: Guru Matematika / BK" />
+                            </div>
+                        </div>
+
+                        <!-- JENIS KELAMIN & NOMOR WA -->
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                            <div class="form-group">
+                                <label class="form-label">Jenis Kelamin:</label>
+                                <select id="regGender" class="form-select">
+                                    <option value="Laki-laki">Laki-laki</option>
+                                    <option value="Perempuan">Perempuan</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Nomor WhatsApp (+62):</label>
+                                <input type="text" id="regWa" class="form-input" placeholder="Opsional (misal: 6281234567890)" />
+                            </div>
+                        </div>
+
+                        <!-- MODUL KEAMANAN SIBER: ANTI-BOT CAPTCHA -->
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-top:10px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-size:11px; font-weight:700; color:#475569;">🛡️ VERIFIKASI KEAMANAN (ANTI-BOT):</span>
+                                <button type="button" onclick="App.generateNewCaptcha()" style="background:none; border:none; color:#2563eb; font-size:11px; cursor:pointer;">
+                                    🔄 Soal Baru
+                                </button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:8px;">
+                                <span id="captchaQuestion" style="font-weight:700; color:#1e3a8a; font-size:13px; background:#eff6ff; padding:6px 10px; border-radius:4px; border:1px solid #bfdbfe;">
+                                    Hitung...
+                                </span>
+                                <input type="number" id="regCaptchaInput" class="form-input" placeholder="Jawaban" style="width:110px;" required />
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px; margin-top:14px; background:#10b981;">
+                            ✨ Daftarkan Akun & Buka Peta
+                        </button>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==============================================================================
+         1. TOP NAVBAR (Bilah Menu Atas - Terbuka Setelah Login)
+         ============================================================================== -->
+    <header class="top-navbar">
+        <div class="brand-section">
+            <div class="brand-icon">🚌</div>
+            <div>
+                <div class="brand-title">BusBuddy SMAN 5</div>
+                <div class="brand-subtitle">Platform Nebeng & Transportasi Publik Pelajar Surabaya</div>
+            </div>
+        </div>
+
+        <div class="navbar-right">
+            <!-- Badge Profil & Peran Pengguna Aktif -->
+            <div class="role-badge" id="userRoleBadge" title="Profil Akun Anda">
+                <span class="dot"></span>
+                <span>Memuat akun...</span>
+            </div>
+
+            <!-- Tombol Keluar (Logout) -->
+            <button onclick="App.logout()" class="btn btn-secondary" 
+                    style="padding:6px 12px; font-size:12px; color:#dc2626; border-color:#fca5a5;" 
+                    title="Keluar dari akun dan kembali ke halaman Login">
+                🚪 Keluar (Logout)
+            </button>
+        </div>
+    </header>
+
+    <!-- ==============================================================================
+         2. MAIN WRAPPER (Sidebar Kontrol & Layar Peta)
+         ============================================================================== -->
+    <main class="main-wrapper">
+        
+        <!-- SIDEBAR PANEL KIRI -->
+        <aside class="sidebar">
+            <!-- Tab Menu Navigasi -->
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="tabTeman">
+                    👥 <span>Teman Sekitar</span>
+                </button>
+                <button class="tab-btn" data-tab="tabTransport">
+                    🚐 <span>Transport Umum</span>
+                </button>
+                <button class="tab-btn" data-tab="tabGuru" id="tabBtnGuru" style="display:none;">
+                    👨‍🏫 <span>Pantau Guru</span>
+                </button>
+                <button class="tab-btn" data-tab="tabDeveloper" id="tabBtnDeveloper" style="display:none;">
+                    💻 <span>Developer Tools</span>
+                </button>
+            </nav>
+
+            <!-- KONTEN TAB 1: PETA TEMAN SEKITAR & TEBENGAN -->
+            <section class="tab-content active" id="tabTeman">
+                <!-- Status Perjalanan Pengguna Aktif -->
+                <div id="userRideStatusContainer"></div>
+
+                <!-- Rekomendasi Pintar Terdekat -->
+                <div id="smartRecommendationContainer"></div>
+
+                <div class="filter-box">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <div class="filter-title" style="margin-bottom:0;">Radius Jarak:</div>
+                        <button onclick="App.searchNearestRide()" class="btn btn-secondary" style="font-size:10px; padding:3px 8px;" title="Cari rekomendasi tebengan terdekat">
+                            🎯 Cari Terdekat
+                        </button>
+                    </div>
+                    <div class="filter-chips">
+                        <button class="chip active" data-filter-distance="all">Semua</button>
+                        <button class="chip" data-filter-distance="1">&lt; 1 km</button>
+                        <button class="chip" data-filter-distance="3">&lt; 3 km</button>
+                        <button class="chip" data-filter-distance="5">&lt; 5 km</button>
+                    </div>
+                </div>
+
+                <!-- Wadah Kartu Siswa -->
+                <div class="cards-list" id="cardsContainer">
+                    <!-- Kartu siswa dirender otomatis oleh js/rides/rides.js -->
+                </div>
+            </section>
+
+            <!-- KONTEN TAB 2: TRANSPORTASI UMUM SURABAYA -->
+            <section class="tab-content" id="tabTransport">
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px; font-size:12px; line-height:1.4;">
+                    <b style="color:#1e3a8a;">🚌 Integrasi Angkutan Kota Surabaya</b>
+                    <p style="color:#64748b; margin-top:4px;">
+                        Pelajar dapat memanfaatkan Feeder Wira Wiri gratis dan Suroboyo Bus dengan tarif khusus untuk menuju kawasan SMAN 5 Surabaya.
+                    </p>
+                </div>
+                <div class="cards-list" id="transportContainer"></div>
+            </section>
+
+            <!-- KONTEN TAB 3: DASHBOARD PANTAU GURU (KHUSUS GURU & DEVELOPER) -->
+            <section class="tab-content" id="tabGuru">
+                <div id="guruDashboardContainer"></div>
+            </section>
+
+            <!-- KONTEN TAB 4: PANEL DEVELOPER (MANAJEMEN DATA USER) -->
+            <section class="tab-content" id="tabDeveloper">
+                <div id="developerContainer"></div>
+            </section>
+        </aside>
+
+        <!-- KANVAS PETA LEAFLET -->
+        <div id="map"></div>
+
+        <!-- TOMBOL KONTROL MENGAMBANG (FLOATING ACTION BUTTONS) -->
+        <div class="floating-controls">
+            <!-- Tombol Bantuan Darurat (SOS) -->
+            <button class="fab-btn fab-sos" onclick="App.triggerSOSModal()" title="Tombol Darurat SOS">
+                🚨 BANTUAN SOS
+            </button>
+
+            <!-- Tombol Tentukan Titik Lokasi Jemput Manual -->
+            <button class="fab-btn" onclick="MapManager.toggleLocationPicker()" style="border-color:#10b981; color:#059669;" title="Klik peta untuk menaruh pin rumah/jemput Anda">
+                🎯 Atur Titik Jemput
+            </button>
+
+            <!-- Tombol Pusatkan ke GPS Saya -->
+            <button class="fab-btn" onclick="MapManager.centerToUser()" title="Pusatkan peta ke lokasi GPS Anda">
+                📍 Posisi Saya
+            </button>
+
+            <!-- Tombol Toggle Halte Transportasi -->
+            <button class="fab-btn" onclick="MapManager.toggleTransport()" title="Sembunyikan/Tampilkan Halte Bus & Kereta">
+                🚌 Halte & Stasiun
+            </button>
+        </div>
+
+    </main>
+
+    <!-- ==============================================================================
+         3. MODAL DIALOG: DEVELOPER TAMBAH USER BARU
+         ============================================================================== -->
+    <div class="modal-overlay" id="devAddUserModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">➕ Tambah Pengguna Baru (Developer)</div>
+                <button class="modal-close" onclick="App.closeDevAddUserModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form onsubmit="App.submitDevAddUser(event)">
+                    <div class="form-group">
+                        <label class="form-label">Tipe Pengguna:</label>
+                        <select id="devUserRole" class="form-select">
+                            <option value="siswa">Siswa SMAN 5</option>
+                            <option value="guru">Guru SMAN 5</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nama Lengkap:</label>
+                        <input type="text" id="devUserNama" class="form-input" placeholder="Contoh: Gilang Ramadhan" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Nomor Identitas (NISN / NIP):</label>
+                        <input type="text" id="devUserIDNumber" class="form-input" placeholder="Contoh: 0087654321" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Kelas / Jabatan:</label>
+                        <input type="text" id="devUserExtra" class="form-input" placeholder="Contoh: XI-MIPA 2 atau Guru Fisika" />
+                    </div>
+                    <div style="display:flex; gap:8px; margin-top:14px;">
+                        <button type="button" class="btn btn-secondary" onclick="App.closeDevAddUserModal()">Batal</button>
+                        <button type="submit" class="btn btn-primary" style="background:#8b5cf6;">Simpan User</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================================================================
+         4. MODAL DIALOG: BANTUAN DARURAT (SOS)
+         ============================================================================== -->
+    <div class="modal-overlay" id="sosModal">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#fef2f2; border-bottom-color:#fecaca;">
+                <div class="modal-title" style="color:#b91c1c;">🚨 PUSAT BANTUAN DARURAT SISWA</div>
+                <button class="modal-close" onclick="App.closeSOSModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="sos-box">
+                    <b>⚠️ Keadaan Darurat di Jalan?</b><br>
+                    Gunakan fitur ini jika Anda mogok, mengalami kecelakaan, ancaman bahaya, atau terlambat genting saat menuju SMAN 5 Surabaya.
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:14px; font-size:12px;">
+                    <div style="color:#64748b; font-weight:600; margin-bottom:4px;">TITIK LOKASI GPS ANDA SAAT INI:</div>
+                    <div id="sosCurrentCoord" style="font-weight:700; color:#1e293b; font-size:13px; font-family:monospace;">
+                        Mendeteksi koordinat...
+                    </div>
+                    <button onclick="App.copyLocationLink()" class="btn btn-secondary" style="margin-top:8px; width:100%;">
+                        📋 Salin Tautan Google Maps Lokasi Saya
+                    </button>
+                </div>
+
+                <div style="font-size:12px; font-weight:700; color:#475569; margin-bottom:8px;">KONTAK DARURAT RESMI:</div>
+                <div id="sosContactsList"></div>
+
+                <button class="btn btn-secondary" onclick="App.closeSOSModal()" style="width:100%; margin-top:10px;">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- WADAH NOTIFIKASI TOAST MELAYANG -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ==============================================================================
+         5. MODUL JAVASCRIPT PER FITUR (TERSTRUKTUR & RINGKAS)
+         ============================================================================== -->
+    <!-- 1. Konfigurasi & Keamanan Dasar -->
+    <script src="js/config/constants.js"></script>
+    <script src="js/security/security.js"></script>
+
+    <!-- 2. Layanan Penyimpanan & API MySQL -->
+    <script src="js/services/storage.js"></script>
+    <script src="js/services/api.js"></script>
+
+    <!-- 3. Peta & Navigasi GPS -->
+    <script src="js/map/map-view.js"></script>
+    <script src="js/navigation/navigation.js"></script>
+
+    <!-- 4. Modul Fitur Aplikasi -->
+    <script src="js/auth/auth.js"></script>
+    <script src="js/rides/rides.js"></script>
+    <script src="js/admin/admin.js"></script>
+    <script src="js/dashboard/dashboard.js"></script>
+    <script src="js/emergency/sos.js"></script>
+
+    <!-- 5. Pengatur Utama Aplikasi -->
+    <script src="js/main/app.js"></script>
+
+</body>
+</html>
