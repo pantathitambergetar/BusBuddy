@@ -28,20 +28,10 @@ const App = {
         this.checkRememberMe();
         this.checkAuthStatus();
 
-        // Inisialisasi Peta
+        // Inisialisasi Peta (GPS dimulai di dalam MapManager.init() via NavigationModule.startGPS())
         MapManager.init();
 
-        // Tampilkan penanda posisi pengguna aktif di peta
-        if (this.currentUser) {
-            const uLat = parseFloat(this.currentUser.lat) || SEKOLAH_DATA.lat;
-            const uLng = parseFloat(this.currentUser.lng) || SEKOLAH_DATA.lng;
-            NavigationModule.setUserLocation(uLat, uLng, `Lokasi Anda (${this.currentUser.nama})`);
-            NavigationModule.startGPS();
-        } else {
-            NavigationModule.startGPS();
-        }
-
-        // Sinkronisasi data dari MySQL/PostgreSQL jika server online
+        // Sinkronisasi data dari PostgreSQL jika server online
         const online = await ApiService.checkServer();
         if (online) {
             await ApiService.syncAll();

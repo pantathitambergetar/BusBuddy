@@ -15,31 +15,75 @@ const NavigationModule = {
     simulatedMarker: null,
 
     // 1. Pelacak GPS Otomatis
+    gpsWatchId: null,
+    bestAccuracy: Infinity,
+
     startGPS() {
-        if (!this.userCoords) {
-            this.setUserLocation(-7.2588, 112.7430, 'Awal (Genteng Kali)');
+        if (!("geolocation" in navigator)) {
+            if (!this.userCoords) this.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Default (Sekolah)', 500);
+            return;
         }
 
-        if (!("geolocation" in navigator)) return;
-
-        navigator.geolocation.watchPosition(
+        // Ambil posisi pertama cepat, lalu lanjut watch untuk akurasi lebih baik
+        navigator.geolocation.getCurrentPosition(
             (pos) => {
                 if (!this.isManualLocation) {
-                    this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'GPS Asli', pos.coords.accuracy);
+                    this.bestAccuracy = pos.coords.accuracy;
+                    this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'Lokasi GPS', pos.coords.accuracy);
+                    this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
                 }
             },
-            (err) => console.warn("GPS Notice:", err.message),
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            () => {
+                if (!this.userCoords) this.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Default (Sekolah)', 500);
+            },
+            { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
         );
+
+        // Lanjut pantau & perbarui jika ada sinyal lebih baik
+        if (this.gpsWatchId !== null) navigator.geolocation.clearWatch(this.gpsWatchId);
+        this.gpsWatchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                if (this.isManualLocation) return;
+                // Hanya perbarui jika akurasi baru lebih baik dari sebelumnya
+                if (pos.coords.accuracy < this.bestAccuracy || this.bestAccuracy === Infinity) {
+                    this.bestAccuracy = pos.coords.accuracy;
+                    this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'GPS Presisi', pos.coords.accuracy);
+                    // Perbarui DB jika akurasi sudah baik (< 100m)
+                    if (pos.coords.accuracy < 100) {
+                        this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
+                    }
+                }
+            },
+            (err) => console.warn("GPS Watch:", err.message),
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+        );
+    },
+
+    // Update koordinat pengguna ke database jika sudah login
+    _updateUserLocationInDB(lat, lng) {
+        const user = window.App && App.currentUser;
+        if (!user || user.peran === 'developer') return;
+        if (!window.ApiService || !ApiService.isOnline) return;
+        const userId = user.id;
+        if (!userId) return;
+        // Perbarui lokasi di DB (fire-and-forget, tidak blokir UI)
+        ApiService._fetch(`/students/${userId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ lat, lng })
+        }).catch(() => {});
     },
 
     setUserLocation(lat, lng, label = 'Lokasi Anda', accuracy = 30) {
         this.userCoords = [lat, lng];
         if (window.MapManager) MapManager.userCoords = this.userCoords;
 
+        // Warna lingkaran akurasi: hijau = bagus, kuning = sedang, merah = buruk
+        const accColor = accuracy < 50 ? '#10b981' : (accuracy < 200 ? '#f59e0b' : '#ef4444');
+        const accLabel = accuracy < 50 ? '✅ Akurat' : (accuracy < 200 ? '⚠️ Sedang' : '📡 Mencari...');
+
         const icon = L.divIcon({
             className: 'custom-pin',
-            html: '<div class="marker-pin marker-user-me" style="background:#059669; color:white; border-color:#d1fae5; box-shadow:0 0 12px rgba(16,185,129,0.8);">👤</div>',
+            html: `<div class="marker-pin marker-user-me" style="background:#059669; color:white; border-color:#d1fae5; box-shadow:0 0 12px rgba(16,185,129,0.8);">👤</div>`,
             iconSize: [32, 32],
             iconAnchor: [16, 16]
         });
@@ -52,30 +96,32 @@ const NavigationModule = {
             this.userGpsMarker.on('dragend', (e) => {
                 const pos = e.target.getLatLng();
                 this.isManualLocation = true;
-                this.setUserLocation(pos.lat, pos.lng, 'Manual (Pin Digeser)');
+                this.setUserLocation(pos.lat, pos.lng, 'Manual (Pin Digeser)', 10);
                 App.showToast("📍 Posisi jemput berhasil dipindahkan!");
             });
 
             this.userGpsCircle = L.circle([lat, lng], {
-                radius: accuracy,
-                color: '#10b981',
-                fillColor: '#10b981',
-                fillOpacity: 0.15,
+                radius: Math.min(accuracy, 500),
+                color: accColor,
+                fillColor: accColor,
+                fillOpacity: 0.1,
                 weight: 1
             }).addTo(map);
         } else {
             this.userGpsMarker.setLatLng([lat, lng]);
             this.userGpsMarker.setIcon(icon);
             this.userGpsCircle.setLatLng([lat, lng]);
-            this.userGpsCircle.setRadius(accuracy);
+            this.userGpsCircle.setRadius(Math.min(accuracy, 500));
+            this.userGpsCircle.setStyle({ color: accColor, fillColor: accColor });
         }
 
         const namaUser = (window.App && App.currentUser) ? App.currentUser.nama : 'Anda';
         this.userGpsMarker.bindPopup(`
-            <div style="font-size:12px; line-height:1.4; min-width:180px;">
-                <b style="color:#059669; font-size:13px;">👤 ${label}</b><br>
-                <b>${namaUser}</b><br>
-                <span style="color:#64748b; font-size:11px;">Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br>
+            <div style="font-size:12px; line-height:1.6; min-width:200px;">
+                <b style="color:#059669; font-size:13px;">👤 ${namaUser}</b><br>
+                <span style="color:#475569;">${label}</span><br>
+                <span style="color:#64748b; font-size:11px;">📍 ${lat.toFixed(6)}, ${lng.toFixed(6)}</span><br>
+                <span style="font-size:10px; color:${accColor}; font-weight:600;">${accLabel} (±${Math.round(accuracy)}m)</span><br>
                 <span style="color:#0284c7; font-size:10px; display:block; margin-top:4px;">👉 <i>Tarik pin ini untuk menggeser titik jemput!</i></span>
             </div>
         `);
@@ -177,29 +223,20 @@ const NavigationModule = {
             return;
         }
 
-        const startCoords = this.userCoords || [-7.2588, 112.7430];
-        const destLat = SEKOLAH_DATA.lat;
-        const destLng = SEKOLAH_DATA.lng;
-
+        const start = this.userCoords || [SEKOLAH_DATA.lat, SEKOLAH_DATA.lng];
+        const dest = [SEKOLAH_DATA.lat, SEKOLAH_DATA.lng];
         App.showToast("🚀 Menyiapkan rute simulasi ke SMAN 5 Surabaya...");
 
         try {
-            const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${startCoords[1]},${startCoords[0]};${destLng},${destLat}?overview=full&geometries=geojson`;
-            const res = await fetch(osrmUrl);
+            const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${dest[1]},${dest[0]}?overview=full&geometries=geojson`;
+            const res = await fetch(url);
             const data = await res.json();
-
-            let routeCoords = [];
-            if (data.routes && data.routes.length > 0) {
-                routeCoords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-            } else {
-                for (let i = 0; i <= 20; i++) {
-                    const ratio = i / 20;
-                    routeCoords.push([
-                        startCoords[0] + (destLat - startCoords[0]) * ratio,
-                        startCoords[1] + (destLng - startCoords[1]) * ratio
-                    ]);
-                }
-            }
+            let routeCoords = (data.routes && data.routes.length > 0)
+                ? data.routes[0].geometry.coordinates.map(c => [c[1], c[0]])
+                : Array.from({length: 21}, (_, i) => [
+                    start[0] + (dest[0] - start[0]) * (i / 20),
+                    start[1] + (dest[1] - start[1]) * (i / 20)
+                ]);
 
             if (this.routeLayer) map.removeLayer(this.routeLayer);
             this.routeLayer = L.polyline(routeCoords, { color: '#10b981', weight: 6 }).addTo(map);
@@ -207,30 +244,24 @@ const NavigationModule = {
 
             const simIcon = L.divIcon({
                 className: 'custom-pin',
-                html: '<div class="marker-pin marker-driver" style="font-size:18px; width:36px; height:36px; box-shadow:0 0 15px #10b981;">🛵</div>',
-                iconSize: [36, 36],
-                iconAnchor: [18, 18]
+                html: '<div class="marker-pin marker-driver" style="font-size:18px;width:36px;height:36px;box-shadow:0 0 15px #10b981;">🛵</div>',
+                iconSize: [36, 36], iconAnchor: [18, 18]
             });
-
             this.simulatedMarker = L.marker(routeCoords[0], { icon: simIcon }).addTo(map);
             this.simulatedMarker.bindPopup("<b>🛵 Menuju SMAN 5 Surabaya</b><br>Kecepatan: ~35 km/jam").openPopup();
-
             let step = 0;
             this.simulationTimer = setInterval(() => {
                 step++;
                 if (step >= routeCoords.length) {
-                    clearInterval(this.simulationTimer);
-                    this.simulationTimer = null;
-                    this.simulatedMarker.setLatLng([destLat, destLng]);
+                    clearInterval(this.simulationTimer); this.simulationTimer = null;
+                    this.simulatedMarker.setLatLng(dest);
                     this.simulatedMarker.bindPopup("<b>🎉 Tiba di Gerbang SMAN 5!</b><br>Tepat Waktu!").openPopup();
                     App.showToast("🎉 Siswa telah tiba di SMAN 5 Surabaya!");
                     return;
                 }
                 this.simulatedMarker.setLatLng(routeCoords[step]);
             }, 600);
-        } catch (e) {
-            App.showToast("⚠️ Gagal memuat simulasi rute.");
-        }
+        } catch (e) { App.showToast("⚠️ Gagal memuat simulasi rute."); }
     }
 };
 
