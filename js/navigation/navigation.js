@@ -16,7 +16,8 @@ const NavigationModule = {
 
     // 1. Pelacak GPS Otomatis
     gpsWatchId: null,
-    bestAccuracy: Infinity,
+    lastSentLat: null,
+    lastSentLng: null,
 
     startGPS() {
         if (!window.App || !App.currentUser) return;
@@ -28,9 +29,9 @@ const NavigationModule = {
         navigator.geolocation.getCurrentPosition(
             (pos) => {
                 if (!this.isManualLocation && window.App && App.currentUser) {
-                    this.bestAccuracy = pos.coords.accuracy;
-                    this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'Lokasi GPS', pos.coords.accuracy);
-                    this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
+                    const { latitude, longitude, accuracy } = pos.coords;
+                    this.setUserLocation(latitude, longitude, 'Lokasi GPS', accuracy);
+                    this._updateUserLocationInDB(latitude, longitude);
                 }
             },
             () => {
@@ -43,14 +44,19 @@ const NavigationModule = {
         this.gpsWatchId = navigator.geolocation.watchPosition(
             (pos) => {
                 if (this.isManualLocation || !window.App || !App.currentUser) return;
-                if (pos.coords.accuracy < this.bestAccuracy || this.bestAccuracy === Infinity) {
-                    this.bestAccuracy = pos.coords.accuracy;
-                    this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'GPS Presisi', pos.coords.accuracy);
-                    if (pos.coords.accuracy < 100) this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
+                const { latitude, longitude, accuracy } = pos.coords;
+                if (accuracy <= 150) {
+                    this.setUserLocation(latitude, longitude, 'GPS Realtime', accuracy);
+                    const moved = !this.lastSentLat || this.getDistanceKm(this.lastSentLat, this.lastSentLng, latitude, longitude) > 0.015;
+                    if (moved) {
+                        this.lastSentLat = latitude;
+                        this.lastSentLng = longitude;
+                        this._updateUserLocationInDB(latitude, longitude);
+                    }
                 }
             },
             (err) => console.warn("GPS Watch:", err.message),
-            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 }
+            { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
         );
     },
 
@@ -64,7 +70,8 @@ const NavigationModule = {
 
     clearUserLocation() {
         this.userCoords = null;
-        this.bestAccuracy = Infinity;
+        this.lastSentLat = null;
+        this.lastSentLng = null;
         this.isManualLocation = false;
         if (window.MapManager) MapManager.userCoords = null;
         if (this.userGpsMarker && MapView.map) { MapView.map.removeLayer(this.userGpsMarker); this.userGpsMarker = null; }

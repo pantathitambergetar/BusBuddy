@@ -61,6 +61,14 @@ const App = {
             }
         });
 
+        // Polling sinkronisasi realtime posisi teman & status setiap 8 detik
+        setInterval(async () => {
+            if (ApiService.isOnline && this.currentUser) {
+                await ApiService.syncAll();
+                this.renderFriendsList();
+            }
+        }, 8000);
+
         // Render seluruh tampilan
         this.renderAll();
         console.log("🚌 BusBuddy SMAN 5 Surabaya siap digunakan.");
