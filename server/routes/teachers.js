@@ -49,21 +49,33 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ success: false, message: `NIP ${g.nip} sudah terdaftar.` });
         }
 
+        // Pastikan ID guru unik agar tidak bentrok primary key
+        let teacherId = g.id;
+        if (!teacherId || teacherId.startsWith('GURU-00')) {
+            teacherId = `GURU-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
+        } else {
+            const [existingId] = await pool.query('SELECT id FROM guru WHERE id = ?', [teacherId]);
+            if (existingId.length > 0) {
+                teacherId = `GURU-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
+            }
+        }
+
         const sql = `
             INSERT INTO guru
             (id, nip, nama, jabatan, jenis_kelamin, password_hash, no_wa, area)
             VALUES (?,?,?,?,?,?,?,?)
         `;
         const vals = [
-            g.id, g.nip, g.nama, g.jabatan || 'Guru SMAN 5 Surabaya',
+            teacherId, g.nip, g.nama, g.jabatan || 'Guru SMAN 5 Surabaya',
             g.jenisKelamin || 'Laki-laki', g.passwordHash,
             g.noWa || '', g.area || 'Ruang Guru SMAN 5 Surabaya'
         ];
         await pool.query(sql, vals);
-        res.status(201).json({ success: true, message: 'Guru berhasil ditambahkan.', data: g });
+        const createdTeacher = { ...g, id: teacherId };
+        res.status(201).json({ success: true, message: 'Guru berhasil ditambahkan.', data: createdTeacher });
     } catch (err) {
         console.error('POST /teachers error:', err.message);
-        res.status(500).json({ success: false, message: 'Gagal menyimpan data guru.' });
+        res.status(500).json({ success: false, message: 'Gagal menyimpan data guru: ' + err.message });
     }
 });
 

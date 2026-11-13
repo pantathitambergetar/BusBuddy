@@ -26,19 +26,12 @@ const PORT = process.env.SERVER_PORT || 3000;
 // MIDDLEWARE
 // ==============================================================================
 
-// Izinkan request dari frontend (file HTML dibuka via Live Server / langsung)
-const allowedOrigins = (process.env.ALLOWED_ORIGIN || 'http://localhost:5500').split(',');
+// Izinkan request dari frontend (semua origin termasuk Vercel, localhost, mobile, dll)
 app.use(cors({
-    origin: (origin, callback) => {
-        // Izinkan request tanpa origin (file:// atau Postman) dan origin yang terdaftar
-        if (!origin || allowedOrigins.includes(origin.trim())) {
-            callback(null, true);
-        } else {
-            callback(new Error(`CORS: Origin '${origin}' tidak diizinkan.`));
-        }
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    origin: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
 }));
 
 // Parse JSON body

@@ -93,8 +93,9 @@ const App = {
         const id = this.currentUser.nisn || this.currentUser.nip || this.currentUser.username || '-';
         badge.innerHTML = `
             <span class="dot" style="background-color:${dotColor}"></span>
-            <span><b>${this.currentUser.nama}</b> (${roleLabel})</span>
-            <span style="font-size:10px; color:#64748b; margin-left:4px;">[ID: ${id}]</span>
+            <span class="badge-user-name" title="${this.currentUser.nama}"><b>${this.currentUser.nama}</b></span>
+            <span class="badge-user-role" style="color:#475569; font-size:11px;">(${roleLabel})</span>
+            <span class="badge-user-id" style="font-size:10px; color:#64748b; margin-left:4px;">[ID: ${id}]</span>
         `;
     },
 
@@ -139,13 +140,16 @@ const App = {
     // 5. Event Listeners untuk Tab Sidebar & Filter
     setupEventListeners() {
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
+            btn.addEventListener('click', async () => {
                 document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                 document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                 btn.classList.add('active');
                 const target = document.getElementById(btn.dataset.tab);
                 if (target) target.classList.add('active');
-                if (btn.dataset.tab === 'tabDeveloper') this.renderDeveloperTools();
+                if (ApiService.isOnline) {
+                    await ApiService.syncAll();
+                }
+                this.renderAll();
             });
         });
 

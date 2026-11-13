@@ -655,17 +655,24 @@ body {
     }
 
     .role-badge {
-        max-width: 140px;
-        padding: 3px 6px;
-        font-size: 10px;
+        max-width: 170px;
+        padding: 4px 8px;
+        font-size: 11px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    .role-badge span {
+    .role-badge .badge-user-name {
         overflow: hidden;
         text-overflow: ellipsis;
+        white-space: nowrap;
+        display: inline-block;
+    }
+
+    .role-badge .badge-user-role,
+    .role-badge .badge-user-id {
+        display: none;
     }
 
     .navbar-right .btn {
@@ -790,7 +797,7 @@ body {
     }
 
     .role-badge {
-        max-width: 110px;
+        max-width: 135px;
     }
 }
 

@@ -109,6 +109,17 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ success: false, message: `NISN ${s.nisn} sudah terdaftar.` });
         }
 
+        // Pastikan ID siswa unik dan tidak duplikat dengan primary key yang sudah ada
+        let studentId = s.id;
+        if (!studentId || studentId.startsWith('SISWA-00')) {
+            studentId = `SISWA-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
+        } else {
+            const [existingId] = await pool.query('SELECT id FROM siswa WHERE id = ?', [studentId]);
+            if (existingId.length > 0) {
+                studentId = `SISWA-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
+            }
+        }
+
         const sql = `
             INSERT INTO siswa 
             (id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
@@ -116,17 +127,18 @@ router.post('/', async (req, res) => {
             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
         `;
         const vals = [
-            s.id, s.nisn, s.nama, s.kelas || 'X-E 1', s.absen || 1,
+            studentId, s.nisn, s.nama, s.kelas || 'X-E 1', parseInt(s.absen) || 1,
             s.jenisKelamin || 'Laki-laki', s.passwordHash,
-            s.lat || -7.2588, s.lng || 112.7430, s.area || 'Genteng Surabaya',
+            parseFloat(s.lat) || -7.2588, parseFloat(s.lng) || 112.7430, s.area || 'Genteng Surabaya',
             s.rutePerjalanan || 'Kawasan Pusat -> SMAN 5', s.noWa || '',
             s.status || 'tersedia'
         ];
         await pool.query(sql, vals);
-        res.status(201).json({ success: true, message: 'Siswa berhasil ditambahkan.', data: s });
+        const created = { ...s, id: studentId, absen: parseInt(s.absen) || 1, lat: parseFloat(s.lat) || -7.2588, lng: parseFloat(s.lng) || 112.7430 };
+        res.status(201).json({ success: true, message: 'Siswa berhasil ditambahkan.', data: created });
     } catch (err) {
         console.error('POST /students error:', err.message);
-        res.status(500).json({ success: false, message: 'Gagal menyimpan data siswa.' });
+        res.status(500).json({ success: false, message: 'Gagal menyimpan data siswa: ' + err.message });
     }
 });
 

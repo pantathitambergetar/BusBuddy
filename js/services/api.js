@@ -56,18 +56,19 @@ const ApiService = {
     },
 
     async saveStudent(student) {
-        if (!this.isOnline) return false;
-        const res = await this._fetch('/students', {
+        if (!this.isOnline) await this.checkServer();
+        if (!this.isOnline) return { success: false, message: 'Server offline' };
+        return await this._fetch('/students', {
             method: 'POST',
             body: JSON.stringify(student)
         });
-        return res.success;
     },
 
     async deleteStudent(id) {
+        if (!this.isOnline) await this.checkServer();
         if (!this.isOnline) return false;
         const res = await this._fetch(`/students/${id}`, { method: 'DELETE' });
-        return res.success;
+        return res && res.success;
     },
 
     // 2. Data Guru
@@ -82,18 +83,19 @@ const ApiService = {
     },
 
     async saveTeacher(teacher) {
-        if (!this.isOnline) return false;
-        const res = await this._fetch('/teachers', {
+        if (!this.isOnline) await this.checkServer();
+        if (!this.isOnline) return { success: false, message: 'Server offline' };
+        return await this._fetch('/teachers', {
             method: 'POST',
             body: JSON.stringify(teacher)
         });
-        return res.success;
     },
 
     async deleteTeacher(id) {
+        if (!this.isOnline) await this.checkServer();
         if (!this.isOnline) return false;
         const res = await this._fetch(`/teachers/${id}`, { method: 'DELETE' });
-        return res.success;
+        return res && res.success;
     },
 
     // 3. Permintaan Tebengan
@@ -156,6 +158,7 @@ const ApiService = {
     },
 
     async syncAll() {
+        if (!this.isOnline) await this.checkServer();
         if (!this.isOnline) return;
         const [students, teachers, requests] = await Promise.all([
             this.getStudents(),
@@ -163,9 +166,18 @@ const ApiService = {
             this.getRequests()
         ]);
         if (window.App) {
-            if (students !== null) window.App.studentsData = students;
-            if (teachers !== null) window.App.teachersData = teachers;
-            if (requests !== null) window.App.requestsData = requests;
+            if (students !== null) {
+                window.App.studentsData = students;
+                StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, students);
+            }
+            if (teachers !== null) {
+                window.App.teachersData = teachers;
+                StorageManager.saveCollection(StorageManager.KEYS.TEACHERS, teachers);
+            }
+            if (requests !== null) {
+                window.App.requestsData = requests;
+                StorageManager.saveCollection(StorageManager.KEYS.REQUESTS, requests);
+            }
         }
         return { students, teachers, requests };
     }

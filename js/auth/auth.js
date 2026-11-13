@@ -208,16 +208,20 @@ const AuthModule = {
                 this.switchAuthTab('login');
                 return;
             }
+            const uniqueId = "SISWA-" + Date.now().toString().slice(-4) + Math.floor(Math.random() * 90 + 10);
             const newStudent = {
-                id: "SISWA-" + (App.studentsData.length + 1).toString().padStart(3, '0'),
+                id: uniqueId,
                 nisn: idNumber, nama, kelas, absen, jenisKelamin: gender,
                 peran: "siswa", passwordHash: passHash,
                 lat: -7.2588, lng: 112.7430, area: "Genteng Surabaya",
                 rutePerjalanan: "Kawasan Pusat -> SMAN 5", noWa, status: "tersedia"
             };
+            const saveRes = await ApiService.saveStudent(newStudent);
+            if (saveRes && saveRes.success && saveRes.data && saveRes.data.id) {
+                newStudent.id = saveRes.data.id;
+            }
             App.studentsData.push(newStudent);
             StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, App.studentsData);
-            ApiService.saveStudent(newStudent);
             alert(`🎉 PENDAFTARAN BERHASIL!\n\nNama: ${nama}\nNISN: ${idNumber}\n🔑 PASSWORD: ${autoPass}`);
             App.currentUser = { ...newStudent };
         } else {
@@ -227,15 +231,19 @@ const AuthModule = {
                 this.switchAuthTab('login');
                 return;
             }
+            const uniqueId = "GURU-" + Date.now().toString().slice(-4) + Math.floor(Math.random() * 90 + 10);
             const newTeacher = {
-                id: "GURU-" + (App.teachersData.length + 1).toString().padStart(3, '0'),
+                id: uniqueId,
                 nip: idNumber, nama, jabatan, jenisKelamin: gender,
                 peran: "guru", passwordHash: passHash, noWa,
                 area: "Ruang Guru SMAN 5 Surabaya"
             };
+            const saveRes = await ApiService.saveTeacher(newTeacher);
+            if (saveRes && saveRes.success && saveRes.data && saveRes.data.id) {
+                newTeacher.id = saveRes.data.id;
+            }
             App.teachersData.push(newTeacher);
             StorageManager.saveCollection(StorageManager.KEYS.TEACHERS, App.teachersData);
-            ApiService.saveTeacher(newTeacher);
             alert(`🎉 PENDAFTARAN GURU BERHASIL!\n\nNama: ${nama}\nNIP: ${idNumber}\n🔑 PASSWORD: ${autoPass}`);
             App.currentUser = { ...newTeacher };
         }
@@ -247,6 +255,7 @@ const AuthModule = {
         NavigationModule.setUserLocation(regLat, regLng, `Lokasi Anda (${App.currentUser.nama})`);
         NavigationModule.startGPS();
         if (MapView.map) MapView.map.setView([regLat, regLng], 15);
+        await ApiService.syncAll();
         App.renderAll();
         App.showToast(`🎉 Selamat datang di BusBuddy, ${App.currentUser.nama}!`);
     },
