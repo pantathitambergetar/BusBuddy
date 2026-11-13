@@ -100,6 +100,8 @@ const AuthModule = {
                 App.currentUser = { ...AKUN_DEVELOPER };
                 StorageManager.saveSession(App.currentUser);
                 App.checkAuthStatus();
+                NavigationModule.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Developer (SMAN 5)');
+                if (MapView.map) MapView.map.setView([SEKOLAH_DATA.lat, SEKOLAH_DATA.lng], 15);
                 App.renderAll();
                 App.showToast("💻 Mode Developer Aktif!");
                 return;
@@ -155,6 +157,11 @@ const AuthModule = {
         App.currentUser = { ...matchedUser };
         StorageManager.saveSession(App.currentUser);
         App.checkAuthStatus();
+        const uLat = parseFloat(App.currentUser.lat) || SEKOLAH_DATA.lat;
+        const uLng = parseFloat(App.currentUser.lng) || SEKOLAH_DATA.lng;
+        NavigationModule.setUserLocation(uLat, uLng, `Lokasi Anda (${App.currentUser.nama})`);
+        NavigationModule.startGPS();
+        if (MapView.map) MapView.map.setView([uLat, uLng], 15);
         App.renderAll();
         App.showToast(`🎉 Login Berhasil! Selamat datang, ${App.currentUser.nama}.`);
     },
@@ -235,6 +242,11 @@ const AuthModule = {
 
         StorageManager.saveSession(App.currentUser);
         App.checkAuthStatus();
+        const regLat = parseFloat(App.currentUser.lat) || SEKOLAH_DATA.lat;
+        const regLng = parseFloat(App.currentUser.lng) || SEKOLAH_DATA.lng;
+        NavigationModule.setUserLocation(regLat, regLng, `Lokasi Anda (${App.currentUser.nama})`);
+        NavigationModule.startGPS();
+        if (MapView.map) MapView.map.setView([regLat, regLng], 15);
         App.renderAll();
         App.showToast(`🎉 Selamat datang di BusBuddy, ${App.currentUser.nama}!`);
     },

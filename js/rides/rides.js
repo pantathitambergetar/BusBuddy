@@ -59,12 +59,10 @@ const RidesModule = {
                 <div style="text-align:center; padding:32px 16px; color:#64748b; font-size:13px;">
                     <p style="font-size:36px; margin-bottom:8px;">👥</p>
                     <b>Belum Ada Teman Terdaftar</b><br>
-                    <span style="font-size:11px; color:#94a3b8; display:block; margin-top:4px;">
-                        Gunakan tombol di bawah untuk memuat data siswa kelas XII-1.
+                    <span style="font-size:11px; color:#94a3b8; display:block; margin-top:6px; line-height:1.5;">
+                        Belum ada siswa lain yang mendaftar.<br>
+                        Data teman akan muncul otomatis begitu mereka mendaftar di web ini.
                     </span>
-                    <button onclick="App.importGoogleSheetStudents()" class="btn btn-primary" style="margin-top:16px; font-size:12px; background:#0284c7; width:100%;">
-                        📥 Muat 32 Siswa Kelas XII-1 (Google Sheets)
-                    </button>
                 </div>
             `;
             return;

@@ -58,17 +58,22 @@ const AdminModule = {
                         </tr>
                     </thead>
                     <tbody>
-                        ${totalSiswa === 0 && totalGuru === 0 ? `
-                            <tr>
-                                <td colspan="4" style="text-align:center; padding:16px; color:#64748b; font-size:11px;">
-                                    Belum ada data user. Gunakan tombol <b>➕ Tambah User Baru</b> atau <b>📥 Impor Siswa XII-1</b> di atas.
-                                </td>
-                            </tr>
-                        ` : ''}
-                        ${App.studentsData.map(s => `
-                            <tr style="border-bottom:1px solid #f1f5f9;">
+                        <!-- Akun Developer (Pengguna Aktif) -->
+                        <tr style="background:#faf5ff; border-bottom:1px solid #ede9fe;">
+                            <td style="padding:6px 8px;"><span style="background:#8b5cf6; color:white; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700;">DEVELOPER</span></td>
+                            <td style="padding:6px 8px;"><b>${AKUN_DEVELOPER.nama}</b> <span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Aktif</span><br><span style="color:#64748b;">${AKUN_DEVELOPER.jabatan}</span></td>
+                            <td style="padding:6px 8px; font-family:monospace; color:#6d28d9; font-weight:700;">${AKUN_DEVELOPER.username}</td>
+                            <td style="padding:6px 8px; text-align:center; color:#64748b; font-size:10px;"><i>Akun Sistem</i></td>
+                        </tr>
+                        ${App.studentsData.map(s => {
+                            const isMe = App.currentUser && (s.id === App.currentUser.id || s.nisn === App.currentUser.nisn);
+                            return `
+                            <tr style="border-bottom:1px solid #f1f5f9; ${isMe ? 'background:#f0fdf4;' : ''}">
                                 <td style="padding:6px 8px;"><span style="background:#e0f2fe; color:#0369a1; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700;">SISWA</span></td>
-                                <td style="padding:6px 8px;"><b>${s.nama}</b><br><span style="color:#64748b;">${s.kelas}</span></td>
+                                <td style="padding:6px 8px;">
+                                    <b>${s.nama}</b> ${isMe ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Aktif</span>' : ''}<br>
+                                    <span style="color:#64748b;">${s.kelas}</span>
+                                </td>
                                 <td style="padding:6px 8px; font-family:monospace;">${s.nisn}</td>
                                 <td style="padding:6px 8px; text-align:center;">
                                     <button onclick="App.devDeleteUser('siswa', '${s.id}', '${s.nama}')" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;" title="Hapus User">
@@ -76,11 +81,17 @@ const AdminModule = {
                                     </button>
                                 </td>
                             </tr>
-                        `).join('')}
-                        ${App.teachersData.map(g => `
-                            <tr style="border-bottom:1px solid #f1f5f9;">
+                            `;
+                        }).join('')}
+                        ${App.teachersData.map(g => {
+                            const isMe = App.currentUser && (g.id === App.currentUser.id || g.nip === App.currentUser.nip);
+                            return `
+                            <tr style="border-bottom:1px solid #f1f5f9; ${isMe ? 'background:#f0fdf4;' : ''}">
                                 <td style="padding:6px 8px;"><span style="background:#fef3c7; color:#b45309; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700;">GURU</span></td>
-                                <td style="padding:6px 8px;"><b>${g.nama}</b><br><span style="color:#64748b;">${g.jabatan}</span></td>
+                                <td style="padding:6px 8px;">
+                                    <b>${g.nama}</b> ${isMe ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Aktif</span>' : ''}<br>
+                                    <span style="color:#64748b;">${g.jabatan}</span>
+                                </td>
                                 <td style="padding:6px 8px; font-family:monospace;">${g.nip}</td>
                                 <td style="padding:6px 8px; text-align:center;">
                                     <button onclick="App.devDeleteUser('guru', '${g.id}', '${g.nama}')" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:3px 6px; border-radius:4px; font-size:10px; cursor:pointer;" title="Hapus User">
@@ -88,7 +99,8 @@ const AdminModule = {
                                     </button>
                                 </td>
                             </tr>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </tbody>
                 </table>
             </div>
@@ -216,6 +228,10 @@ const AdminModule = {
 
     // 5. Impor Data Google Sheets
     async importGoogleSheetStudents() {
+        if (!App.currentUser || App.currentUser.peran !== 'developer') {
+            App.showToast("⛔ Hanya Developer yang dapat mengimpor data!");
+            return;
+        }
         App.showToast("⏳ Sedang memuat 32 siswa kelas XII-1 dari Google Sheets...");
         const result = await ApiService.importGoogleSheetStudents();
         if (result && result.success && result.data) {

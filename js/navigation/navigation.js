@@ -39,9 +39,9 @@ const NavigationModule = {
 
         const icon = L.divIcon({
             className: 'custom-pin',
-            html: '<div class="marker-gps-user" title="Tarik pin ini untuk memindahkan titik jemput Anda"></div>',
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
+            html: '<div class="marker-pin marker-user-me" style="background:#059669; color:white; border-color:#d1fae5; box-shadow:0 0 12px rgba(16,185,129,0.8);">👤</div>',
+            iconSize: [32, 32],
+            iconAnchor: [16, 16]
         });
 
         const map = MapView.map;
@@ -65,15 +65,18 @@ const NavigationModule = {
             }).addTo(map);
         } else {
             this.userGpsMarker.setLatLng([lat, lng]);
+            this.userGpsMarker.setIcon(icon);
             this.userGpsCircle.setLatLng([lat, lng]);
             this.userGpsCircle.setRadius(accuracy);
         }
 
+        const namaUser = (window.App && App.currentUser) ? App.currentUser.nama : 'Anda';
         this.userGpsMarker.bindPopup(`
-            <div style="font-size:12px; line-height:1.4;">
-                <b style="color:#059669;">📍 ${label}</b><br>
-                <span>Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br>
-                <span style="color:#64748b; font-size:11px;">👉 <i>Tarik pin ini untuk menggeser titik jemput!</i></span>
+            <div style="font-size:12px; line-height:1.4; min-width:180px;">
+                <b style="color:#059669; font-size:13px;">👤 ${label}</b><br>
+                <b>${namaUser}</b><br>
+                <span style="color:#64748b; font-size:11px;">Koordinat: ${lat.toFixed(5)}, ${lng.toFixed(5)}</span><br>
+                <span style="color:#0284c7; font-size:10px; display:block; margin-top:4px;">👉 <i>Tarik pin ini untuk menggeser titik jemput!</i></span>
             </div>
         `);
 

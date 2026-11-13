@@ -31,11 +31,21 @@ const App = {
         // Inisialisasi Peta
         MapManager.init();
 
-        // Sinkronisasi data dari MySQL jika server online
+        // Tampilkan penanda posisi pengguna aktif di peta
+        if (this.currentUser) {
+            const uLat = parseFloat(this.currentUser.lat) || SEKOLAH_DATA.lat;
+            const uLng = parseFloat(this.currentUser.lng) || SEKOLAH_DATA.lng;
+            NavigationModule.setUserLocation(uLat, uLng, `Lokasi Anda (${this.currentUser.nama})`);
+            NavigationModule.startGPS();
+        } else {
+            NavigationModule.startGPS();
+        }
+
+        // Sinkronisasi data dari MySQL/PostgreSQL jika server online
         const online = await ApiService.checkServer();
         if (online) {
             await ApiService.syncAll();
-            console.log("📊 Data berhasil disinkronkan dari MySQL database.");
+            console.log("📊 Data berhasil disinkronkan dari database.");
         }
 
         // Render seluruh tampilan
@@ -135,6 +145,7 @@ const App = {
                 btn.classList.add('active');
                 const target = document.getElementById(btn.dataset.tab);
                 if (target) target.classList.add('active');
+                if (btn.dataset.tab === 'tabDeveloper') this.renderDeveloperTools();
             });
         });
 
