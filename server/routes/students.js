@@ -142,7 +142,7 @@ router.post('/', async (req, res) => {
     }
 });
 
-// PUT /api/students/:id — Update data siswa (misal: update koordinat GPS, dll)
+// PUT /api/students/:id — Update data siswa (misal: update koordinat GPS, status online/offline, dll)
 router.put('/:id', async (req, res) => {
     const s = req.body;
     try {
@@ -154,7 +154,8 @@ router.put('/:id', async (req, res) => {
                 lng = COALESCE(?, lng),
                 area = COALESCE(?, area),
                 no_wa = COALESCE(?, no_wa),
-                status = COALESCE(?, status)
+                status = COALESCE(?, status),
+                updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         `;
         const vals = [
@@ -169,6 +170,17 @@ router.put('/:id', async (req, res) => {
     } catch (err) {
         console.error('PUT /students error:', err.message);
         res.status(500).json({ success: false, message: 'Gagal memperbarui data siswa.' });
+    }
+});
+
+// POST /api/students/:id/status — Update status online/offline (bisa dipanggil via sendBeacon saat tab ditutup)
+router.post('/:id/status', async (req, res) => {
+    const status = req.body && req.body.status ? req.body.status : 'offline';
+    try {
+        await pool.query('UPDATE siswa SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, req.params.id]);
+        res.json({ success: true, status });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 

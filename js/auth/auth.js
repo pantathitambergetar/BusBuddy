@@ -153,6 +153,10 @@ const AuthModule = {
             return;
         }
 
+        matchedUser.status = 'online';
+        if (ApiService.isOnline && matchedUser.peran === 'siswa') {
+            ApiService._fetch(`/students/${matchedUser.id}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) }).catch(() => {});
+        }
         StorageManager.saveRememberedID(identifier, rememberMe);
         App.currentUser = { ...matchedUser };
         StorageManager.saveSession(App.currentUser);
@@ -162,6 +166,7 @@ const AuthModule = {
         NavigationModule.setUserLocation(uLat, uLng, `Lokasi Anda (${App.currentUser.nama})`);
         NavigationModule.startGPS();
         if (MapView.map) MapView.map.setView([uLat, uLng], 15);
+        if (ApiService.isOnline) await ApiService.syncAll();
         App.renderAll();
         App.showToast(`🎉 Login Berhasil! Selamat datang, ${App.currentUser.nama}.`);
     },
@@ -261,13 +266,20 @@ const AuthModule = {
     },
 
     // 7. Logout
-    logout() {
+    async logout() {
         if (!confirm("Apakah Anda yakin ingin keluar dari akun?")) return;
+        const oldUser = App.currentUser;
+        if (oldUser && oldUser.peran === 'siswa' && ApiService.isOnline) {
+            await ApiService._fetch(`/students/${oldUser.id}`, { method: 'PUT', body: JSON.stringify({ status: 'offline' }) }).catch(() => {});
+        }
+        NavigationModule.stopGPS();
         App.currentUser = null;
         StorageManager.saveSession(null);
         App.checkAuthStatus();
         App.checkRememberMe();
-        App.showToast("🚪 Anda telah keluar dari sistem.");
+        if (ApiService.isOnline) await ApiService.syncAll();
+        App.renderAll();
+        App.showToast("🚪 Anda telah keluar dari sistem (Status Offline).");
     }
 };
 

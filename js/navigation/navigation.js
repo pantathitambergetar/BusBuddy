@@ -19,39 +19,34 @@ const NavigationModule = {
     bestAccuracy: Infinity,
 
     startGPS() {
+        if (!window.App || !App.currentUser) return;
         if (!("geolocation" in navigator)) {
             if (!this.userCoords) this.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Default (Sekolah)', 500);
             return;
         }
 
-        // Ambil posisi pertama cepat, lalu lanjut watch untuk akurasi lebih baik
         navigator.geolocation.getCurrentPosition(
             (pos) => {
-                if (!this.isManualLocation) {
+                if (!this.isManualLocation && window.App && App.currentUser) {
                     this.bestAccuracy = pos.coords.accuracy;
                     this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'Lokasi GPS', pos.coords.accuracy);
                     this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
                 }
             },
             () => {
-                if (!this.userCoords) this.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Default (Sekolah)', 500);
+                if (!this.userCoords && window.App && App.currentUser) this.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Default (Sekolah)', 500);
             },
             { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
         );
 
-        // Lanjut pantau & perbarui jika ada sinyal lebih baik
         if (this.gpsWatchId !== null) navigator.geolocation.clearWatch(this.gpsWatchId);
         this.gpsWatchId = navigator.geolocation.watchPosition(
             (pos) => {
-                if (this.isManualLocation) return;
-                // Hanya perbarui jika akurasi baru lebih baik dari sebelumnya
+                if (this.isManualLocation || !window.App || !App.currentUser) return;
                 if (pos.coords.accuracy < this.bestAccuracy || this.bestAccuracy === Infinity) {
                     this.bestAccuracy = pos.coords.accuracy;
                     this.setUserLocation(pos.coords.latitude, pos.coords.longitude, 'GPS Presisi', pos.coords.accuracy);
-                    // Perbarui DB jika akurasi sudah baik (< 100m)
-                    if (pos.coords.accuracy < 100) {
-                        this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
-                    }
+                    if (pos.coords.accuracy < 100) this._updateUserLocationInDB(pos.coords.latitude, pos.coords.longitude);
                 }
             },
             (err) => console.warn("GPS Watch:", err.message),
@@ -59,21 +54,35 @@ const NavigationModule = {
         );
     },
 
+    stopGPS() {
+        if (this.gpsWatchId !== null && "geolocation" in navigator) {
+            navigator.geolocation.clearWatch(this.gpsWatchId);
+            this.gpsWatchId = null;
+        }
+        this.clearUserLocation();
+    },
+
+    clearUserLocation() {
+        this.userCoords = null;
+        this.bestAccuracy = Infinity;
+        this.isManualLocation = false;
+        if (window.MapManager) MapManager.userCoords = null;
+        if (this.userGpsMarker && MapView.map) { MapView.map.removeLayer(this.userGpsMarker); this.userGpsMarker = null; }
+        if (this.userGpsCircle && MapView.map) { MapView.map.removeLayer(this.userGpsCircle); this.userGpsCircle = null; }
+        if (this.routeLayer && MapView.map) { MapView.map.removeLayer(this.routeLayer); this.routeLayer = null; }
+    },
+
     // Update koordinat pengguna ke database jika sudah login
     _updateUserLocationInDB(lat, lng) {
         const user = window.App && App.currentUser;
-        if (!user || user.peran === 'developer') return;
-        if (!window.ApiService || !ApiService.isOnline) return;
+        if (!user || user.peran === 'developer' || !window.ApiService || !ApiService.isOnline) return;
         const userId = user.id;
         if (!userId) return;
-        // Perbarui lokasi di DB (fire-and-forget, tidak blokir UI)
-        ApiService._fetch(`/students/${userId}`, {
-            method: 'PUT',
-            body: JSON.stringify({ lat, lng })
-        }).catch(() => {});
+        ApiService._fetch(`/students/${userId}`, { method: 'PUT', body: JSON.stringify({ lat, lng, status: 'online' }) }).catch(() => {});
     },
 
     setUserLocation(lat, lng, label = 'Lokasi Anda', accuracy = 30) {
+        if (!window.App || !App.currentUser) return;
         this.userCoords = [lat, lng];
         if (window.MapManager) MapManager.userCoords = this.userCoords;
 
@@ -188,24 +197,12 @@ const NavigationModule = {
                 const distanceKm = (data.routes[0].distance / 1000).toFixed(1);
                 const durationMin = Math.round(data.routes[0].duration / 60);
 
-                this.routeLayer = L.polyline(routeCoords, {
-                    color: '#2563eb',
-                    weight: 5,
-                    opacity: 0.8,
-                    dashArray: '8, 8'
-                }).addTo(map);
-
+                this.routeLayer = L.polyline(routeCoords, { color: '#2563eb', weight: 5, opacity: 0.8, dashArray: '8, 8' }).addTo(map);
                 map.fitBounds(this.routeLayer.getBounds(), { padding: [40, 40] });
-                App.showToast(`🗺️ Rute ke SMAN 5 dari ${nameTarget}: ${distanceKm} km (~${durationMin} mnt)`);
-            } else {
-                throw new Error("Rute tidak ditemukan");
-            }
+                App.showToast(`🗺️ Rute ke SMAN 5: ${distanceKm} km (~${durationMin} mnt)`);
+            } else { throw new Error("Rute nihil"); }
         } catch (_) {
-            this.routeLayer = L.polyline([[startLat, startLng], [destLat, destLng]], {
-                color: '#3b82f6',
-                weight: 4,
-                dashArray: '5, 10'
-            }).addTo(map);
+            this.routeLayer = L.polyline([[startLat, startLng], [destLat, destLng]], { color: '#3b82f6', weight: 4, dashArray: '5, 10' }).addTo(map);
             map.fitBounds(this.routeLayer.getBounds(), { padding: [40, 40] });
         }
     },
@@ -271,8 +268,10 @@ const MapManager = {
     get userCoords() { return NavigationModule.userCoords; },
     init() {
         MapView.init();
-        NavigationModule.startGPS();
+        if (window.App && App.currentUser) NavigationModule.startGPS();
     },
+    stopGPS() { NavigationModule.stopGPS(); },
+    clearUserLocation() { NavigationModule.clearUserLocation(); },
     renderFriends(list) { MapView.renderFriends(list); },
     renderTransport() { MapView.renderTransport(); },
     toggleTransport() { return MapView.toggleTransport(); },

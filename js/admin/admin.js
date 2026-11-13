@@ -67,11 +67,13 @@ const AdminModule = {
                         </tr>
                         ${App.studentsData.map(s => {
                             const isMe = App.currentUser && (s.id === App.currentUser.id || s.nisn === App.currentUser.nisn);
+                            const isOnline = (s.status || '').toLowerCase() === 'online' || (s.status || '').toLowerCase() === 'tersedia' || (s.status || '').toLowerCase() === 'aktif';
+                            const stTag = isOnline ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Online</span>' : '<span style="background:#f1f5f9; color:#64748b; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">⚪ Offline</span>';
                             return `
                             <tr style="border-bottom:1px solid #f1f5f9; ${isMe ? 'background:#f0fdf4;' : ''}">
                                 <td style="padding:6px 8px;"><span style="background:#e0f2fe; color:#0369a1; padding:1px 6px; border-radius:4px; font-size:9px; font-weight:700;">SISWA</span></td>
                                 <td style="padding:6px 8px;">
-                                    <b>${s.nama}</b> ${isMe ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Aktif</span>' : ''}<br>
+                                    <b>${s.nama}</b> ${isMe ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Anda</span>' : stTag}<br>
                                     <span style="color:#64748b;">${s.kelas}</span>
                                 </td>
                                 <td style="padding:6px 8px; font-family:monospace;">${s.nisn}</td>

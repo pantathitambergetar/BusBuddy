@@ -50,7 +50,8 @@ const RidesModule = {
         const forMap = App.studentsData.filter(s => {
             if (currentId && s.id === currentId) return false;
             if (currentNisn && s.nisn === currentNisn) return false;
-            return true;
+            const st = (s.status || '').toLowerCase();
+            return st === 'online' || st === 'tersedia' || st === 'aktif';
         });
         MapManager.renderFriends(forMap);
 
@@ -94,6 +95,10 @@ const RidesModule = {
         }
 
         const request = App.requestsData.find(r => r.studentId === student.id);
+        const isOnline = (student.status || '').toLowerCase() === 'online' || (student.status || '').toLowerCase() === 'tersedia' || (student.status || '').toLowerCase() === 'aktif';
+        const stBadge = isOnline 
+            ? '<span style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">🟢 Online</span>'
+            : '<span style="background:#f1f5f9; color:#64748b; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">⚪ Offline</span>';
         let btnAction = '';
         if (request) {
             btnAction = `<button class="btn btn-secondary" style="font-size:11px;" disabled>⏳ ${request.statusText}</button>`;
@@ -106,7 +111,7 @@ const RidesModule = {
                 <div class="student-header">
                     <div class="student-info">
                         <div>
-                            <div class="student-name">${student.nama}</div>
+                            <div class="student-name">${student.nama} ${stBadge}</div>
                             <div class="student-class">${student.kelas} • Absen ${student.absen || '-'} • NISN: ${student.nisn || '-'}</div>
                         </div>
                     </div>

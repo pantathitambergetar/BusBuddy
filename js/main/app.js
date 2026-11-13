@@ -28,15 +28,38 @@ const App = {
         this.checkRememberMe();
         this.checkAuthStatus();
 
-        // Inisialisasi Peta (GPS dimulai di dalam MapManager.init() via NavigationModule.startGPS())
+        // Inisialisasi Peta & Status GPS
         MapManager.init();
+        if (this.currentUser) {
+            const uLat = parseFloat(this.currentUser.lat) || SEKOLAH_DATA.lat;
+            const uLng = parseFloat(this.currentUser.lng) || SEKOLAH_DATA.lng;
+            NavigationModule.setUserLocation(uLat, uLng, `Lokasi Anda (${this.currentUser.nama})`);
+            NavigationModule.startGPS();
+        } else {
+            NavigationModule.stopGPS();
+        }
 
         // Sinkronisasi data dari PostgreSQL jika server online
         const online = await ApiService.checkServer();
         if (online) {
+            if (this.currentUser && this.currentUser.peran === 'siswa') {
+                ApiService._fetch(`/students/${this.currentUser.id}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) }).catch(() => {});
+            }
             await ApiService.syncAll();
             console.log("📊 Data berhasil disinkronkan dari database.");
         }
+
+        // Tangani saat tab/browser ditutup agar status menjadi offline
+        window.addEventListener('beforeunload', () => {
+            if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline) {
+                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'offline' }),
+                    keepalive: true
+                }).catch(() => {});
+            }
+        });
 
         // Render seluruh tampilan
         this.renderAll();

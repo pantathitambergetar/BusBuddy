@@ -59,10 +59,11 @@ router.post('/login', async (req, res) => {
     }
 
     try {
-        // 3. Cek Siswa di Database MySQL
+        // 3. Cek Siswa di Database PostgreSQL
         const [students] = await pool.query('SELECT * FROM siswa WHERE nisn = ?', [identifier]);
         if (students.length > 0) {
             const row = students[0];
+            await pool.query("UPDATE siswa SET status = 'online', updated_at = CURRENT_TIMESTAMP WHERE id = ?", [row.id]);
             const user = {
                 id:             row.id,
                 nisn:           row.nisn,
@@ -77,7 +78,7 @@ router.post('/login', async (req, res) => {
                 area:           row.area,
                 rutePerjalanan: row.rute_perjalanan,
                 noWa:           row.no_wa || '',
-                status:         row.status
+                status:         'online'
             };
             return res.json({
                 success: true,
