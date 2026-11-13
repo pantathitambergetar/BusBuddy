@@ -59,9 +59,9 @@ router.post('/import-sheet', async (req, res) => {
                 (id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
                  lat, lng, area, rute_perjalanan, no_wa, status)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                ON DUPLICATE KEY UPDATE 
-                    nama=VALUES(nama), kelas=VALUES(kelas), absen=VALUES(absen),
-                    lat=VALUES(lat), lng=VALUES(lng), area=VALUES(area), rute_perjalanan=VALUES(rute_perjalanan);
+                ON CONFLICT (nisn) DO UPDATE SET 
+                    nama = EXCLUDED.nama, kelas = EXCLUDED.kelas, absen = EXCLUDED.absen,
+                    lat = EXCLUDED.lat, lng = EXCLUDED.lng, area = EXCLUDED.area, rute_perjalanan = EXCLUDED.rute_perjalanan;
             `, [
                 s.id, s.nisn, s.nama, s.kelas, s.absen,
                 s.jenisKelamin, s.passwordHash,
@@ -72,12 +72,12 @@ router.post('/import-sheet', async (req, res) => {
 
         res.json({
             success: true,
-            message: `Berhasil mengimpor ${students.length} data siswa kelas XII-1 ke database MySQL!`,
+            message: `Berhasil mengimpor ${students.length} data siswa kelas XII-1 ke database PostgreSQL!`,
             data: students
         });
     } catch (err) {
         console.error('Import sheet error:', err.message);
-        res.status(500).json({ success: false, message: 'Gagal mengimpor ke MySQL: ' + err.message });
+        res.status(500).json({ success: false, message: 'Gagal mengimpor ke PostgreSQL: ' + err.message });
     }
 });
 

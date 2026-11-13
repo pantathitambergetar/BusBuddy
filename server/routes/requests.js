@@ -40,7 +40,7 @@ router.post('/', async (req, res) => {
         await pool.query(`
             INSERT INTO tebengan_requests (student_id, student_name, waktu, status, status_text)
             VALUES (?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE waktu = VALUES(waktu), status = 'menunggu', status_text = 'Menunggu Konfirmasi'
+            ON CONFLICT (student_id) DO UPDATE SET waktu = EXCLUDED.waktu, status = 'menunggu', status_text = 'Menunggu Konfirmasi'
         `, [r.studentId, r.studentName, r.waktu, 'menunggu', 'Menunggu Konfirmasi']);
         res.status(201).json({ success: true, message: 'Permintaan tebengan disimpan.' });
     } catch (err) {

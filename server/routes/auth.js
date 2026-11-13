@@ -108,11 +108,11 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // 5. Tidak ditemukan di MySQL
+        // 5. Tidak ditemukan di PostgreSQL
         return res.status(404).json({
             success: false,
             code: 'NOT_FOUND',
-            message: `Nomor Identitas ${identifier} belum terdaftar di database MySQL BusBuddy.`
+            message: `Nomor Identitas ${identifier} belum terdaftar di database PostgreSQL BusBuddy.`
         });
 
     } catch (err) {

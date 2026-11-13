@@ -17,7 +17,7 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const https = require('https');
-const mysql = require('mysql2/promise');
+const { pool } = require('./db');
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1cp3WrmxTltGrVuAD2UNmuAYWHdBBl1GYJ6IALMdoKUM/export?format=csv';
 const CSV_FILE = path.join(__dirname, 'students_sheet.csv');
@@ -184,28 +184,19 @@ async function main() {
     fs.writeFileSync(exportFile, JSON.stringify(students, null, 2), 'utf8');
     console.log(`💾 File referensi '${path.basename(exportFile)}' berhasil dibuat.`);
 
-    // 3. Simpan langsung ke database MySQL jika server MySQL aktif
+    // 3. Simpan langsung ke database PostgreSQL jika server PostgreSQL aktif
     try {
-        console.log('\n🔌 Mencoba menghubungkan ke database MySQL...');
-        const conn = await mysql.createConnection({
-            host: process.env.DB_HOST || 'localhost',
-            port: parseInt(process.env.DB_PORT) || 3306,
-            user: process.env.DB_USER || 'root',
-            password: process.env.DB_PASSWORD || '',
-            database: process.env.DB_NAME || 'busbuddy_db'
-        });
-
-        console.log('✅ Terhubung ke database MySQL. Memasukkan data siswa...');
+        console.log('\n🔌 Mencoba menghubungkan ke database PostgreSQL...');
         let inserted = 0;
         for (const s of students) {
-            await conn.query(`
+            await pool.query(`
                 INSERT INTO siswa 
                 (id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
                  lat, lng, area, rute_perjalanan, no_wa, status)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                ON DUPLICATE KEY UPDATE 
-                    nama=VALUES(nama), kelas=VALUES(kelas), absen=VALUES(absen),
-                    lat=VALUES(lat), lng=VALUES(lng), area=VALUES(area), rute_perjalanan=VALUES(rute_perjalanan);
+                ON CONFLICT (nisn) DO UPDATE SET 
+                    nama = EXCLUDED.nama, kelas = EXCLUDED.kelas, absen = EXCLUDED.absen,
+                    lat = EXCLUDED.lat, lng = EXCLUDED.lng, area = EXCLUDED.area, rute_perjalanan = EXCLUDED.rute_perjalanan;
             `, [
                 s.id, s.nisn, s.nama, s.kelas, s.absen,
                 s.jenisKelamin, s.passwordHash,
@@ -214,10 +205,9 @@ async function main() {
             ]);
             inserted++;
         }
-        await conn.end();
-        console.log(`🎉 Berhasil memasukkan ${inserted} siswa ke tabel 'siswa' di MySQL!`);
+        console.log(`🎉 Berhasil memasukkan ${inserted} siswa ke tabel 'siswa' di PostgreSQL!`);
     } catch (dbErr) {
-        console.warn(`⚠️ MySQL belum berjalan (${dbErr.message}).`);
+        console.warn(`⚠️ PostgreSQL belum berjalan (${dbErr.message}).`);
         console.warn('   Data sudah tersimpan di backup_migration.json dan siap dimigrasikan kapan saja.');
     }
 

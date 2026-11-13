@@ -24,8 +24,8 @@ router.post('/import', async (req, res) => {
                 (id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
                  lat, lng, area, rute_perjalanan, no_wa, status)
                 VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                ON DUPLICATE KEY UPDATE 
-                    nama=VALUES(nama), kelas=VALUES(kelas), lat=VALUES(lat), lng=VALUES(lng);
+                ON CONFLICT (nisn) DO UPDATE SET 
+                    nama = EXCLUDED.nama, kelas = EXCLUDED.kelas, lat = EXCLUDED.lat, lng = EXCLUDED.lng;
             `, [
                 s.id || `SISWA-${Date.now()}`, s.nisn, s.nama, s.kelas || 'X-E 1', s.absen || 1,
                 s.jenisKelamin || 'Laki-laki', s.passwordHash || 'migrated',
@@ -43,8 +43,8 @@ router.post('/import', async (req, res) => {
                 INSERT INTO guru
                 (id, nip, nama, jabatan, jenis_kelamin, password_hash, no_wa, area)
                 VALUES (?,?,?,?,?,?,?,?)
-                ON DUPLICATE KEY UPDATE 
-                    nama=VALUES(nama), jabatan=VALUES(jabatan);
+                ON CONFLICT (nip) DO UPDATE SET 
+                    nama = EXCLUDED.nama, jabatan = EXCLUDED.jabatan;
             `, [
                 g.id || `GURU-${Date.now()}`, g.nip, g.nama, g.jabatan || 'Guru SMAN 5 Surabaya',
                 g.jenisKelamin || 'Laki-laki', g.passwordHash || 'migrated',
@@ -59,14 +59,14 @@ router.post('/import', async (req, res) => {
             await pool.query(`
                 INSERT INTO tebengan_requests (student_id, student_name, waktu, status, status_text)
                 VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE waktu = VALUES(waktu);
+                ON CONFLICT (student_id) DO UPDATE SET waktu = EXCLUDED.waktu;
             `, [r.studentId, r.studentName, r.waktu || '06:15 WIB', r.status || 'menunggu', r.statusText || 'Menunggu Konfirmasi']);
             requestsImported++;
         }
 
         res.json({
             success: true,
-            message: `Migrasi ke MySQL berhasil: ${studentsImported} Siswa, ${teachersImported} Guru, ${requestsImported} Permintaan.`,
+            message: `Migrasi ke PostgreSQL berhasil: ${studentsImported} Siswa, ${teachersImported} Guru, ${requestsImported} Permintaan.`,
             migrated: { studentsImported, teachersImported, requestsImported }
         });
 

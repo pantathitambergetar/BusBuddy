@@ -1,11 +1,13 @@
 /**
  * ==============================================================================
- * BUSBUDDY SMAN 5 SURABAYA - API SERVICE JARINGAN & MYSQL (js/services/api.js)
+ * BUSBUDDY SMAN 5 SURABAYA - API SERVICE JARINGAN & POSTGRESQL (js/services/api.js)
  * ==============================================================================
  */
 
 const ApiService = {
-    BASE_URL: 'http://localhost:3000/api',
+    BASE_URL: (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) 
+        ? `${window.location.origin}/api` 
+        : 'http://localhost:3000/api',
     isOnline: false,
 
     // Cek koneksi ke server backend
@@ -22,7 +24,7 @@ const ApiService = {
         }
 
         if (this.isOnline) {
-            console.log('🟢 BusBuddy API Server terhubung — Mode Database MySQL aktif');
+            console.log('🟢 BusBuddy API Server terhubung — Mode Database PostgreSQL aktif');
         } else {
             console.warn('🟡 API Server offline — Mode Penyimpanan Mandiri (Lokal)');
         }

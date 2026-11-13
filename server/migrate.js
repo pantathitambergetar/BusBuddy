@@ -1,12 +1,11 @@
 /**
  * ==============================================================================
- * BUSBUDDY SMAN 5 SURABAYA - SKRIP MIGRASI DATABASE MySQL (migrate.js)
+ * BUSBUDDY SMAN 5 SURABAYA - SKRIP MIGRASI DATABASE PostgreSQL (migrate.js)
  * ==============================================================================
  * Skrip otomatis ini akan:
- * 1. Menghubungkan ke MySQL host (localhost)
- * 2. Membuat database `busbuddy_db` jika belum ada
- * 3. Membuat tabel `siswa`, `guru`, dan `tebengan_requests` jika belum ada
- * 4. Melakukan migrasi data dari file JSON jika tersedia
+ * 1. Menghubungkan ke PostgreSQL (lokal atau cloud via DATABASE_URL)
+ * 2. Membuat tabel `siswa`, `guru`, dan `tebengan_requests` jika belum ada
+ * 3. Melakukan migrasi data dari file JSON jika tersedia
  * 
  * Jalankan dengan:
  *   npm run migrate  atau  node migrate.js
@@ -14,47 +13,18 @@
  */
 
 require('dotenv').config();
-const mysql = require('mysql2/promise');
+const { pool } = require('./db');
 const fs = require('fs');
 const path = require('path');
 
 async function runMigration() {
     console.log('\n=============================================================');
-    console.log('🚀 MEMULAI MIGRASI DATABASE MYSQL - BUSBUDDY SMAN 5 SURABAYA');
+    console.log('🚀 MEMULAI MIGRASI DATABASE POSTGRESQL - BUSBUDDY SMAN 5');
     console.log('=============================================================');
 
-    const config = {
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT) || 3306,
-        user: process.env.DB_USER || 'root',
-        password: process.env.DB_PASSWORD || ''
-    };
-
-    const dbName = process.env.DB_NAME || 'busbuddy_db';
-
-    console.log(`📌 Host     : ${config.host}:${config.port}`);
-    console.log(`📌 User     : ${config.user}`);
-    console.log(`📌 Database : ${dbName}`);
-    console.log('-------------------------------------------------------------');
-
-    let connection;
     try {
-        // 1. Hubungkan ke MySQL server tanpa memilih database dulu
-        connection = await mysql.createConnection(config);
-        console.log('✅ Berhasil terhubung ke server MySQL.');
-
-        // 2. Buat database jika belum ada
-        await connection.query(`
-            CREATE DATABASE IF NOT EXISTS \`${dbName}\`
-            CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-        `);
-        console.log(`✅ Database '${dbName}' siap digunakan.`);
-
-        // 3. Gunakan database tersebut
-        await connection.changeUser({ database: dbName });
-
-        // 4. Buat Tabel Siswa
-        await connection.query(`
+        // 1. Buat Tabel Siswa
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS siswa (
                 id              VARCHAR(20)     PRIMARY KEY,
                 nisn            VARCHAR(20)     UNIQUE NOT NULL,
@@ -63,21 +33,21 @@ async function runMigration() {
                 absen           INT             DEFAULT 1,
                 jenis_kelamin   VARCHAR(15)     DEFAULT 'Laki-laki',
                 password_hash   VARCHAR(255)    NOT NULL,
-                lat             DECIMAL(10,7)   DEFAULT -7.2588000,
-                lng             DECIMAL(10,7)   DEFAULT 112.7430000,
+                lat             NUMERIC(10,7)   DEFAULT -7.2588000,
+                lng             NUMERIC(10,7)   DEFAULT 112.7430000,
                 area            VARCHAR(100)    DEFAULT 'Genteng Surabaya',
                 rute_perjalanan VARCHAR(200)    DEFAULT 'Kawasan Pusat -> SMAN 5',
                 no_wa           VARCHAR(20)     DEFAULT '',
                 status          VARCHAR(20)     DEFAULT 'tersedia',
-                created_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-                updated_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_nisn (nisn)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP,
+                updated_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_siswa_nisn ON siswa (nisn);
         `);
         console.log('✅ Tabel `siswa` terverifikasi.');
 
-        // 5. Buat Tabel Guru
-        await connection.query(`
+        // 2. Buat Tabel Guru
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS guru (
                 id              VARCHAR(20)     PRIMARY KEY,
                 nip             VARCHAR(30)     UNIQUE NOT NULL,
@@ -87,29 +57,29 @@ async function runMigration() {
                 password_hash   VARCHAR(255)    NOT NULL,
                 no_wa           VARCHAR(20)     DEFAULT '',
                 area            VARCHAR(100)    DEFAULT 'Ruang Guru SMAN 5 Surabaya',
-                created_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-                updated_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX idx_nip (nip)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP,
+                updated_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_guru_nip ON guru (nip);
         `);
         console.log('✅ Tabel `guru` terverifikasi.');
 
-        // 6. Buat Tabel Permintaan Tebengan
-        await connection.query(`
+        // 3. Buat Tabel Permintaan Tebengan
+        await pool.query(`
             CREATE TABLE IF NOT EXISTS tebengan_requests (
-                id              INT             AUTO_INCREMENT PRIMARY KEY,
+                id              SERIAL          PRIMARY KEY,
                 student_id      VARCHAR(20)     UNIQUE NOT NULL,
                 student_name    VARCHAR(100)    NOT NULL,
                 waktu           VARCHAR(20),
                 status          VARCHAR(20)     DEFAULT 'menunggu',
                 status_text     VARCHAR(50)     DEFAULT 'Menunggu Konfirmasi',
-                created_at      TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-                INDEX idx_student_id (student_id)
-            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_requests_student_id ON tebengan_requests (student_id);
         `);
         console.log('✅ Tabel `tebengan_requests` terverifikasi.');
 
-        // 7. Cek apakah ada file data migrasi lokal (misal backup_migration.json)
+        // 4. Cek file backup jika ada
         const backupFile = path.join(__dirname, 'backup_migration.json');
         if (fs.existsSync(backupFile)) {
             console.log('\n📦 Ditemukan file migrasi data: backup_migration.json');
@@ -119,14 +89,14 @@ async function runMigration() {
                 let importedStudents = 0;
                 let importedTeachers = 0;
 
-                if (Array.isArray(backup.students)) {
+                if (Array.isArray(backup.students) && backup.students.length > 0) {
                     for (const s of backup.students) {
-                        await connection.query(`
+                        await pool.query(`
                             INSERT INTO siswa 
                             (id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
                              lat, lng, area, rute_perjalanan, no_wa, status)
                             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
-                            ON DUPLICATE KEY UPDATE nama=VALUES(nama), kelas=VALUES(kelas), lat=VALUES(lat), lng=VALUES(lng);
+                            ON CONFLICT (nisn) DO UPDATE SET nama = EXCLUDED.nama, kelas = EXCLUDED.kelas, lat = EXCLUDED.lat, lng = EXCLUDED.lng;
                         `, [
                             s.id, s.nisn, s.nama, s.kelas || 'X-E 1', s.absen || 1,
                             s.jenisKelamin || 'Laki-laki', s.passwordHash || 'migrated',
@@ -138,13 +108,13 @@ async function runMigration() {
                     }
                 }
 
-                if (Array.isArray(backup.teachers)) {
+                if (Array.isArray(backup.teachers) && backup.teachers.length > 0) {
                     for (const g of backup.teachers) {
-                        await connection.query(`
+                        await pool.query(`
                             INSERT INTO guru
                             (id, nip, nama, jabatan, jenis_kelamin, password_hash, no_wa, area)
                             VALUES (?,?,?,?,?,?,?,?)
-                            ON DUPLICATE KEY UPDATE nama=VALUES(nama), jabatan=VALUES(jabatan);
+                            ON CONFLICT (nip) DO UPDATE SET nama = EXCLUDED.nama, jabatan = EXCLUDED.jabatan;
                         `, [
                             g.id, g.nip, g.nama, g.jabatan || 'Guru SMAN 5 Surabaya',
                             g.jenisKelamin || 'Laki-laki', g.passwordHash || 'migrated',
@@ -161,35 +131,28 @@ async function runMigration() {
         }
 
         // Tampilkan ringkasan tabel
-        const [studentCount] = await connection.query('SELECT COUNT(*) as count FROM siswa');
-        const [teacherCount] = await connection.query('SELECT COUNT(*) as count FROM guru');
-        const [reqCount] = await connection.query('SELECT COUNT(*) as count FROM tebengan_requests');
+        const [studentRows] = await pool.query('SELECT COUNT(*) as count FROM siswa');
+        const [teacherRows] = await pool.query('SELECT COUNT(*) as count FROM guru');
+        const [reqRows] = await pool.query('SELECT COUNT(*) as count FROM tebengan_requests');
 
         console.log('-------------------------------------------------------------');
-        console.log(`📊 STATUS TERKINI DATABASE '${dbName}':`);
-        console.log(`   - Siswa terdaftar : ${studentCount[0].count} orang`);
-        console.log(`   - Guru terdaftar  : ${teacherCount[0].count} orang`);
-        console.log(`   - Permintaan aktif: ${reqCount[0].count} permintaan`);
+        console.log(`📊 STATUS TERKINI DATABASE POSTGRESQL:`);
+        console.log(`   - Siswa terdaftar : ${studentRows[0].count} orang`);
+        console.log(`   - Guru terdaftar  : ${teacherRows[0].count} orang`);
+        console.log(`   - Permintaan aktif: ${reqRows[0].count} permintaan`);
         console.log('=============================================================');
-        console.log('✨ MIGRASI DATABASE BERHASIL PENUH & SELESAI!');
+        console.log('✨ MIGRASI DATABASE POSTGRESQL BERHASIL PENUH & SELESAI!');
         console.log('=============================================================\n');
 
     } catch (err) {
         console.error('\n❌ KESALAHAN PADA PROSES MIGRASI:');
         console.error(err.message);
-        console.error('\n💡 Solusi:');
-        console.error('1. Pastikan layanan MySQL (seperti XAMPP MySQL atau MySQL Server) sudah berjalan.');
-        console.error('2. Periksa kecocokan password root di file server/.env');
-        console.error('3. Port default MySQL adalah 3306.');
         process.exit(1);
-    } finally {
-        if (connection) await connection.end();
     }
 }
 
-// Jalankan jika dieksekusi langsung
 if (require.main === module) {
-    runMigration();
+    runMigration().then(() => pool.end && pool.end());
 }
 
 module.exports = { runMigration };
