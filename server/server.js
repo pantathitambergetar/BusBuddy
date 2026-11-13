@@ -114,6 +114,17 @@ const path = require('path');
 const rootDir = path.join(__dirname, '..');
 app.use(express.static(rootDir));
 
+app.get('/', (req, res) => {
+    res.sendFile(path.join(rootDir, 'index.html'));
+});
+app.get('/index.html', (req, res) => {
+    res.sendFile(path.join(rootDir, 'index.html'));
+});
+app.get('/style.css', (req, res) => {
+    res.sendFile(path.join(rootDir, 'style.css'));
+});
+app.use('/js', express.static(path.join(rootDir, 'js')));
+
 // ==============================================================================
 // RATE LIMITER: Anti-DDoS & Perlindungan Brute-Force
 // ==============================================================================

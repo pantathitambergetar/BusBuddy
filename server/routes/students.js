@@ -38,7 +38,7 @@ router.get('/', async (req, res) => {
         res.json({ success: true, data: rows.map(rowToStudent) });
     } catch (err) {
         console.error('GET /students error:', err.message);
-        res.status(500).json({ success: false, message: 'Gagal mengambil data siswa.' });
+        res.status(500).json({ success: false, message: 'Gagal mengambil data siswa: ' + err.message });
     }
 });
 
