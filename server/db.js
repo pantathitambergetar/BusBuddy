@@ -52,14 +52,16 @@ async function testConnection() {
     try {
         const client = await rawPool.connect();
         const dbInfo = process.env.DATABASE_URL 
-            ? 'Cloud PostgreSQL' 
+            ? 'Cloud PostgreSQL (Supabase)' 
             : `${poolConfig.database}@${poolConfig.host}:${poolConfig.port}`;
         console.log('✅ Koneksi PostgreSQL berhasil! Database:', dbInfo);
         client.release();
     } catch (err) {
         console.error('❌ Koneksi PostgreSQL GAGAL:', err.message);
         console.error('   Pastikan PostgreSQL berjalan dan variabel .env atau DATABASE_URL sudah dikonfigurasi.');
-        process.exit(1);
+        if (!process.env.VERCEL) {
+            process.exit(1);
+        }
     }
 }
 
