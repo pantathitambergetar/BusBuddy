@@ -71,6 +71,15 @@ const ApiService = {
         return res && res.success;
     },
 
+    async sendHeartbeat(data = {}) {
+        const user = window.App && App.currentUser;
+        if (!user || user.peran !== 'siswa' || !this.isOnline) return;
+        return await this._fetch(`/students/${user.id}/heartbeat`, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    },
+
     // 2. Data Guru
     async getTeachers() {
         if (!this.isOnline) return null;

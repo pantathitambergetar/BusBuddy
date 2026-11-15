@@ -67,7 +67,7 @@ const AdminModule = {
                         </tr>
                         ${App.studentsData.map(s => {
                             const isMe = App.currentUser && (s.id === App.currentUser.id || s.nisn === App.currentUser.nisn);
-                            const isOnline = (s.status || '').toLowerCase() === 'online' || (s.status || '').toLowerCase() === 'tersedia' || (s.status || '').toLowerCase() === 'aktif';
+                            const isOnline = (s.status || '').toLowerCase() === 'online';
                             const stTag = isOnline ? '<span style="background:#dcfce7; color:#15803d; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">🟢 Online</span>' : '<span style="background:#f1f5f9; color:#64748b; font-size:9px; padding:1px 5px; border-radius:4px; font-weight:700;">⚪ Offline</span>';
                             return `
                             <tr style="border-bottom:1px solid #f1f5f9; ${isMe ? 'background:#f0fdf4;' : ''}">

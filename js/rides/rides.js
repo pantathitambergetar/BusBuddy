@@ -50,8 +50,7 @@ const RidesModule = {
         const forMap = App.studentsData.filter(s => {
             if (currentId && s.id === currentId) return false;
             if (currentNisn && s.nisn === currentNisn) return false;
-            const st = (s.status || '').toLowerCase();
-            return st === 'online' || st === 'tersedia' || st === 'aktif';
+            return (s.status || '').toLowerCase() === 'online';
         });
         MapManager.renderFriends(forMap);
 
@@ -95,7 +94,7 @@ const RidesModule = {
         }
 
         const request = App.requestsData.find(r => r.studentId === student.id);
-        const isOnline = (student.status || '').toLowerCase() === 'online' || (student.status || '').toLowerCase() === 'tersedia' || (student.status || '').toLowerCase() === 'aktif';
+        const isOnline = (student.status || '').toLowerCase() === 'online';
         const stBadge = isOnline 
             ? '<span style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">🟢 Online</span>'
             : '<span style="background:#f1f5f9; color:#64748b; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">⚪ Offline</span>';

@@ -11,38 +11,41 @@ const DashboardModule = {
         if (!container) return;
 
         const totalSiswa = App.studentsData.length;
-        const diJalan = totalSiswa > 0 ? Math.max(0, totalSiswa - 1) : 0;
-        const tiba = totalSiswa > 0 ? 1 : 0;
+        const onlineSiswa = App.studentsData.filter(s => (s.status || '').toLowerCase() === 'online').length;
+        const offlineSiswa = totalSiswa - onlineSiswa;
 
         container.innerHTML = `
             <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:12px; margin-bottom:14px;">
                 <b style="color:#1e3a8a; font-size:13px;">👨‍🏫 Monitoring Kehadiran & Keselamatan Siswa SMAN 5</b>
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:8px;">
                     <div style="background:white; padding:8px; border-radius:6px; text-align:center;">
-                        <span style="font-size:20px; font-weight:700; color:#10b981;">${diJalan}</span><br>
-                        <span style="font-size:11px; color:#64748b;">Siswa di Jalan</span>
+                        <span style="font-size:20px; font-weight:700; color:#10b981;">${onlineSiswa}</span><br>
+                        <span style="font-size:11px; color:#64748b;">Siswa Online</span>
                     </div>
                     <div style="background:white; padding:8px; border-radius:6px; text-align:center;">
-                        <span style="font-size:20px; font-weight:700; color:#3b82f6;">${tiba}</span><br>
-                        <span style="font-size:11px; color:#64748b;">Sudah Tiba di Sekolah</span>
+                        <span style="font-size:20px; font-weight:700; color:#64748b;">${offlineSiswa}</span><br>
+                        <span style="font-size:11px; color:#64748b;">Siswa Offline</span>
                     </div>
                 </div>
             </div>
 
             <div style="font-size:12px; font-weight:700; color:#475569; margin-bottom:8px;">STATUS KEBERANGKATAN SISWA:</div>
             <div class="cards-list">
-                ${App.studentsData.map(s => `
+                ${App.studentsData.map(s => {
+                    const isOnline = (s.status || '').toLowerCase() === 'online';
+                    return `
                     <div style="background:white; border:1px solid #e2e8f0; border-radius:6px; padding:10px; font-size:12px;">
                         <div style="display:flex; justify-content:space-between;">
                             <b>${s.nama} (${s.kelas})</b>
-                            <span style="color:#10b981; font-weight:600;">● Aktif</span>
+                            ${isOnline ? '<span style="color:#10b981; font-weight:700;">🟢 Online</span>' : '<span style="color:#94a3b8; font-weight:600;">⚪ Offline</span>'}
                         </div>
                         <div style="color:#64748b; margin-top:4px;">
                             Absen: ${s.absen || '-'} • NISN: ${s.nisn || '-'}<br>
                             Area: ${s.area || '-'}
                         </div>
                     </div>
-                `).join('')}
+                    `;
+                }).join('')}
             </div>
         `;
     },

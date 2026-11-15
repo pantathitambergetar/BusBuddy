@@ -43,27 +43,49 @@ const App = {
         const online = await ApiService.checkServer();
         if (online) {
             if (this.currentUser && this.currentUser.peran === 'siswa') {
-                ApiService._fetch(`/students/${this.currentUser.id}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) }).catch(() => {});
+                const c = NavigationModule.userCoords;
+                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
             }
             await ApiService.syncAll();
             console.log("📊 Data berhasil disinkronkan dari database.");
         }
 
+        // Heartbeat sinyal aktif setiap 12 detik selama window aktif
+        setInterval(() => {
+            if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline && !document.hidden) {
+                const c = NavigationModule.userCoords;
+                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+            }
+        }, 12000);
+
+        // Visibility Change: Deteksi saat tab diminimalkan / layar terkunci
+        document.addEventListener('visibilitychange', () => {
+            if (!this.currentUser || this.currentUser.peran !== 'siswa' || !ApiService.isOnline) return;
+            if (document.hidden) {
+                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}/status`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'offline' }), keepalive: true
+                }).catch(() => {});
+            } else {
+                const c = NavigationModule.userCoords;
+                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+                ApiService.syncAll().then(() => this.renderFriendsList());
+            }
+        });
+
         // Tangani saat tab/browser ditutup agar status menjadi offline
         window.addEventListener('beforeunload', () => {
             if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline) {
-                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}`, {
-                    method: 'PUT',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'offline' }),
-                    keepalive: true
+                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}/status`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: 'offline' }), keepalive: true
                 }).catch(() => {});
             }
         });
 
         // Polling sinkronisasi realtime posisi teman & status setiap 8 detik
         setInterval(async () => {
-            if (ApiService.isOnline && this.currentUser) {
+            if (ApiService.isOnline && this.currentUser && !document.hidden) {
                 await ApiService.syncAll();
                 this.renderFriendsList();
             }

@@ -12,7 +12,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../db');
 
-// Helper: konversi row MySQL → objek siswa format frontend
+// Helper: konversi row MySQL/PostgreSQL → objek siswa format frontend
 function rowToStudent(row) {
     return {
         id:             row.id,
@@ -27,14 +27,27 @@ function rowToStudent(row) {
         area:           row.area,
         rutePerjalanan: row.rute_perjalanan,
         noWa:           row.no_wa || '',
-        status:         row.status
+        status:         row.status,
+        updatedAt:      row.updated_at
     };
 }
 
-// GET /api/students — Ambil semua siswa
+// GET /api/students — Ambil semua siswa dengan status online dihitung realtime (< 40 detik)
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM siswa ORDER BY absen ASC, created_at DESC');
+        const sql = `
+            SELECT id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
+                   lat, lng, area, rute_perjalanan, no_wa,
+                   CASE 
+                       WHEN status = 'offline' THEN 'offline'
+                       WHEN updated_at >= NOW() - INTERVAL '40 seconds' THEN 'online'
+                       ELSE 'offline'
+                   END AS status,
+                   updated_at
+            FROM siswa 
+            ORDER BY absen ASC, created_at DESC
+        `;
+        const [rows] = await pool.query(sql);
         res.json({ success: true, data: rows.map(rowToStudent) });
     } catch (err) {
         console.error('GET /students error:', err.message);
@@ -81,10 +94,21 @@ router.post('/import-sheet', async (req, res) => {
     }
 });
 
-// GET /api/students/:nisn — Ambil satu siswa berdasarkan NISN
+// GET /api/students/:nisn — Ambil satu siswa berdasarkan NISN dengan status realtime
 router.get('/:nisn', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM siswa WHERE nisn = ?', [req.params.nisn]);
+        const sql = `
+            SELECT id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
+                   lat, lng, area, rute_perjalanan, no_wa,
+                   CASE 
+                       WHEN status = 'offline' THEN 'offline'
+                       WHEN updated_at >= NOW() - INTERVAL '40 seconds' THEN 'online'
+                       ELSE 'offline'
+                   END AS status,
+                   updated_at
+            FROM siswa WHERE nisn = ?
+        `;
+        const [rows] = await pool.query(sql, [req.params.nisn]);
         if (rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Siswa tidak ditemukan.' });
         }
@@ -170,6 +194,27 @@ router.put('/:id', async (req, res) => {
     } catch (err) {
         console.error('PUT /students error:', err.message);
         res.status(500).json({ success: false, message: 'Gagal memperbarui data siswa.' });
+    }
+});
+
+// POST /api/students/:id/heartbeat — Heartbeat sinyal aktif dari browser pengguna yang online
+router.post('/:id/heartbeat', async (req, res) => {
+    try {
+        const { lat, lng } = req.body || {};
+        if (lat && lng) {
+            await pool.query(
+                "UPDATE siswa SET status = 'online', lat = ?, lng = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                [parseFloat(lat), parseFloat(lng), req.params.id]
+            );
+        } else {
+            await pool.query(
+                "UPDATE siswa SET status = 'online', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
+                [req.params.id]
+            );
+        }
+        res.json({ success: true, status: 'online' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
     }
 });
 
