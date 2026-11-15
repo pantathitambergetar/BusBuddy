@@ -2,7 +2,7 @@
 <html lang="id">    
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
     <!-- Memutus identitas pelacakan agar server peta CartoDB / OSM tidak memblokir localhost -->
     <meta name="referrer" content="no-referrer">
@@ -210,10 +210,23 @@
         </div>
     </header>
 
+    <!-- Bilah Alih Tampilan Khusus Layar HP / Mobile (Peta vs Daftar Menu) -->
+    <div class="mobile-view-bar" id="mobileViewBar">
+        <button class="mobile-view-btn active" id="btnViewSplit" onclick="App.setMobileView('split')">
+            ⚖️ Belah Layar
+        </button>
+        <button class="mobile-view-btn" id="btnViewList" onclick="App.setMobileView('list')">
+            📋 Daftar & Menu
+        </button>
+        <button class="mobile-view-btn" id="btnViewMap" onclick="App.setMobileView('map')">
+            🗺️ Peta Penuh
+        </button>
+    </div>
+
     <!-- ==============================================================================
          2. MAIN WRAPPER (Sidebar Kontrol & Layar Peta)
          ============================================================================== -->
-    <main class="main-wrapper">
+    <main class="main-wrapper view-split">
         
         <!-- SIDEBAR PANEL KIRI -->
         <aside class="sidebar">

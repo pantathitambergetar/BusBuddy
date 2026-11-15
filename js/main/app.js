@@ -244,7 +244,31 @@ const App = {
     closeSOSModal() { EmergencyModule.closeModal(); },
     sendSosWhatsApp(num) { EmergencyModule.sendWhatsApp(num); },
     copyLocationLink() { EmergencyModule.copyLink(); },
-    renderEmergencyContacts() { EmergencyModule.renderContacts(); }
+    renderEmergencyContacts() { EmergencyModule.renderContacts(); },
+
+    // 7. Pengatur Tampilan Khusus Layar HP (Mobile View Switcher)
+    setMobileView(mode) {
+        const wrap = document.querySelector('.main-wrapper');
+        if (!wrap) return;
+        wrap.classList.remove('view-split', 'view-list-only', 'view-map-only');
+        document.querySelectorAll('.mobile-view-btn').forEach(b => b.classList.remove('active'));
+        if (mode === 'list') {
+            wrap.classList.add('view-list-only');
+            const b = document.getElementById('btnViewList');
+            if (b) b.classList.add('active');
+        } else if (mode === 'map') {
+            wrap.classList.add('view-map-only');
+            const b = document.getElementById('btnViewMap');
+            if (b) b.classList.add('active');
+        } else {
+            wrap.classList.add('view-split');
+            const b = document.getElementById('btnViewSplit');
+            if (b) b.classList.add('active');
+        }
+        if (window.MapView && MapView.map) {
+            setTimeout(() => MapView.map.invalidateSize(), 150);
+        }
+    }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
