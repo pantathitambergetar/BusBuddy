@@ -43,20 +43,25 @@ const App = {
         const online = await ApiService.checkServer();
         if (online) {
             if (this.currentUser && this.currentUser.peran === 'siswa') {
+                // Kirim heartbeat DULU sebelum syncAll agar updated_at di DB sudah fresh
                 const c = NavigationModule.userCoords;
-                await ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+                const hbId = this.currentUser.id || this.currentUser.nisn;
+                await ApiService._fetch(`/students/${hbId}/heartbeat`, {
+                    method: 'POST',
+                    body: JSON.stringify(c ? { lat: c[0], lng: c[1] } : {})
+                });
             }
             await ApiService.syncAll();
             console.log("📊 Data berhasil disinkronkan dari database.");
         }
 
-        // Heartbeat sinyal aktif setiap 12 detik selama window aktif
+        // Heartbeat sinyal aktif setiap 15 detik selama window aktif
         setInterval(async () => {
             if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline && !document.hidden) {
                 const c = NavigationModule.userCoords;
                 await ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
             }
-        }, 12000);
+        }, 15000);
 
         // Visibility Change: Sinkronisasi saat tab kembali aktif
         document.addEventListener('visibilitychange', async () => {

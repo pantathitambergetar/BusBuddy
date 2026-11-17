@@ -32,15 +32,16 @@ function rowToStudent(row) {
     };
 }
 
-// GET /api/students — Ambil semua siswa dengan status online dihitung realtime (< 90 detik)
+// GET /api/students — Ambil semua siswa, status dihitung dari selisih waktu updated_at vs NOW()
 router.get('/', async (req, res) => {
     try {
+        // Gunakan interval longgar (5 menit) agar toleran terhadap delay network & cold start Vercel
         const sql = `
             SELECT id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
-                       WHEN updated_at >= NOW() - INTERVAL '90 seconds' THEN 'online'
+                       WHEN updated_at >= NOW() - INTERVAL '5 minutes' THEN 'online'
                        ELSE 'offline'
                    END AS status,
                    updated_at
@@ -102,13 +103,13 @@ router.get('/:nisn', async (req, res) => {
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
-                       WHEN updated_at >= NOW() - INTERVAL '90 seconds' THEN 'online'
+                       WHEN updated_at >= NOW() - INTERVAL '5 minutes' THEN 'online'
                        ELSE 'offline'
                    END AS status,
                    updated_at
-            FROM siswa WHERE nisn = ?
+            FROM siswa WHERE nisn = ? OR id = ?
         `;
-        const [rows] = await pool.query(sql, [req.params.nisn]);
+        const [rows] = await pool.query(sql, [req.params.nisn, req.params.nisn]);
         if (rows.length === 0) {
             return res.status(404).json({ success: false, message: 'Siswa tidak ditemukan.' });
         }

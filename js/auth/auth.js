@@ -154,13 +154,19 @@ const AuthModule = {
         }
 
         matchedUser.status = 'online';
-        if (ApiService.isOnline && matchedUser.peran === 'siswa') {
-            const targetId = matchedUser.id || matchedUser.nisn;
-            await ApiService._fetch(`/students/${targetId}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) });
-        }
         StorageManager.saveRememberedID(identifier, rememberMe);
         App.currentUser = { ...matchedUser };
         StorageManager.saveSession(App.currentUser);
+
+        if (ApiService.isOnline && matchedUser.peran === 'siswa') {
+            // Langsung heartbeat ke endpoint khusus — ini yang paling andal mengupdate updated_at
+            const hbId = matchedUser.id || matchedUser.nisn;
+            await ApiService._fetch(`/students/${hbId}/heartbeat`, {
+                method: 'POST',
+                body: JSON.stringify({ lat: parseFloat(matchedUser.lat) || null, lng: parseFloat(matchedUser.lng) || null })
+            });
+        }
+
         App.checkAuthStatus();
         const uLat = parseFloat(App.currentUser.lat) || SEKOLAH_DATA.lat;
         const uLng = parseFloat(App.currentUser.lng) || SEKOLAH_DATA.lng;
