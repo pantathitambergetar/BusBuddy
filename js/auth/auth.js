@@ -155,7 +155,8 @@ const AuthModule = {
 
         matchedUser.status = 'online';
         if (ApiService.isOnline && matchedUser.peran === 'siswa') {
-            ApiService._fetch(`/students/${matchedUser.id}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) }).catch(() => {});
+            const targetId = matchedUser.id || matchedUser.nisn;
+            await ApiService._fetch(`/students/${targetId}`, { method: 'PUT', body: JSON.stringify({ status: 'online' }) });
         }
         StorageManager.saveRememberedID(identifier, rememberMe);
         App.currentUser = { ...matchedUser };
@@ -219,7 +220,7 @@ const AuthModule = {
                 nisn: idNumber, nama, kelas, absen, jenisKelamin: gender,
                 peran: "siswa", passwordHash: passHash,
                 lat: -7.2588, lng: 112.7430, area: "Genteng Surabaya",
-                rutePerjalanan: "Kawasan Pusat -> SMAN 5", noWa, status: "tersedia"
+                rutePerjalanan: "Kawasan Pusat -> SMAN 5", noWa, status: "online"
             };
             const saveRes = await ApiService.saveStudent(newStudent);
             if (saveRes && saveRes.success && saveRes.data && saveRes.data.id) {
@@ -229,6 +230,7 @@ const AuthModule = {
             StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, App.studentsData);
             alert(`🎉 PENDAFTARAN BERHASIL!\n\nNama: ${nama}\nNISN: ${idNumber}\n🔑 PASSWORD: ${autoPass}`);
             App.currentUser = { ...newStudent };
+            if (ApiService.isOnline) await ApiService.sendHeartbeat();
         } else {
             let jabatan = SecurityUtil.sanitize(document.getElementById('regJabatan').value.trim()) || 'Guru SMAN 5 Surabaya';
             if (App.teachersData.some(g => g.nip === idNumber)) {

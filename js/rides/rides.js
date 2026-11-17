@@ -13,13 +13,19 @@ const RidesModule = {
             return;
         }
 
+        const isOnline = ApiService.isOnline;
+        const statusBadge = isOnline 
+            ? '<span style="background:#dcfce7; color:#15803d; font-weight:700; padding:2px 8px; border-radius:10px; font-size:10px;">🟢 ONLINE (Aktif di Peta)</span>'
+            : '<span style="background:#f1f5f9; color:#64748b; font-weight:700; padding:2px 8px; border-radius:10px; font-size:10px;">⚪ OFFLINE (Lokal)</span>';
+
         container.innerHTML = `
             <div style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; padding:10px 12px; margin-bottom:10px; font-size:12px;">
-                <div style="font-weight:700; color:#1e3a8a; margin-bottom:3px;">
-                    🎒 Siswa SMAN 5 Surabaya
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:700; color:#1e3a8a;">🎒 ${App.currentUser.nama}</span>
+                    ${statusBadge}
                 </div>
                 <div style="color:#475569; font-size:11px;">
-                    Temukan teman satu rute menuju sekolah untuk berangkat bersama.
+                    Status Anda aktif. Pin lokasi teman sekitar akan muncul otomatis begitu mereka membuka web.
                 </div>
             </div>
         `;

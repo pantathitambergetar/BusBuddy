@@ -44,39 +44,36 @@ const App = {
         if (online) {
             if (this.currentUser && this.currentUser.peran === 'siswa') {
                 const c = NavigationModule.userCoords;
-                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+                await ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
             }
             await ApiService.syncAll();
             console.log("📊 Data berhasil disinkronkan dari database.");
         }
 
         // Heartbeat sinyal aktif setiap 12 detik selama window aktif
-        setInterval(() => {
+        setInterval(async () => {
             if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline && !document.hidden) {
                 const c = NavigationModule.userCoords;
-                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+                await ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
             }
         }, 12000);
 
-        // Visibility Change: Deteksi saat tab diminimalkan / layar terkunci
-        document.addEventListener('visibilitychange', () => {
+        // Visibility Change: Sinkronisasi saat tab kembali aktif
+        document.addEventListener('visibilitychange', async () => {
             if (!this.currentUser || this.currentUser.peran !== 'siswa' || !ApiService.isOnline) return;
-            if (document.hidden) {
-                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}/status`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ status: 'offline' }), keepalive: true
-                }).catch(() => {});
-            } else {
+            if (!document.hidden) {
                 const c = NavigationModule.userCoords;
-                ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
-                ApiService.syncAll().then(() => this.renderFriendsList());
+                await ApiService.sendHeartbeat(c ? { lat: c[0], lng: c[1] } : {});
+                await ApiService.syncAll();
+                this.renderAll();
             }
         });
 
         // Tangani saat tab/browser ditutup agar status menjadi offline
         window.addEventListener('beforeunload', () => {
             if (this.currentUser && this.currentUser.peran === 'siswa' && ApiService.isOnline) {
-                fetch(`${ApiService.BASE_URL}/students/${this.currentUser.id}/status`, {
+                const targetId = this.currentUser.id || this.currentUser.nisn;
+                fetch(`${ApiService.BASE_URL}/students/${targetId}/status`, {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ status: 'offline' }), keepalive: true
                 }).catch(() => {});
@@ -124,21 +121,20 @@ const App = {
         if (!badge || !this.currentUser) return;
 
         let roleLabel = 'Siswa SMAN 5';
-        let dotColor = '#0284c7';
-        if (this.currentUser.peran === 'guru') {
-            roleLabel = 'Guru SMAN 5';
-            dotColor = '#d97706';
-        } else if (this.currentUser.peran === 'developer') {
-            roleLabel = 'Developer / Admin';
-            dotColor = '#8b5cf6';
-        }
+        if (this.currentUser.peran === 'guru') roleLabel = 'Guru SMAN 5';
+        else if (this.currentUser.peran === 'developer') roleLabel = 'Developer';
 
-        const id = this.currentUser.nisn || this.currentUser.nip || this.currentUser.username || '-';
+        const isOnline = ApiService.isOnline;
+        const dotBg = isOnline ? '#10b981' : '#94a3b8';
+        const stText = isOnline ? 'Online' : 'Offline';
+        const stBg = isOnline ? '#dcfce7' : '#f1f5f9';
+        const stCol = isOnline ? '#15803d' : '#64748b';
+
         badge.innerHTML = `
-            <span class="dot" style="background-color:${dotColor}"></span>
+            <span class="dot" style="background-color:${dotBg}"></span>
             <span class="badge-user-name" title="${this.currentUser.nama}"><b>${this.currentUser.nama}</b></span>
+            <span style="background:${stBg}; color:${stCol}; font-size:10px; font-weight:700; padding:1px 6px; border-radius:10px;">● ${stText}</span>
             <span class="badge-user-role" style="color:#475569; font-size:11px;">(${roleLabel})</span>
-            <span class="badge-user-id" style="font-size:10px; color:#64748b; margin-left:4px;">[ID: ${id}]</span>
         `;
     },
 

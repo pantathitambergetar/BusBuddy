@@ -32,7 +32,7 @@ function rowToStudent(row) {
     };
 }
 
-// GET /api/students — Ambil semua siswa dengan status online dihitung realtime (< 40 detik)
+// GET /api/students — Ambil semua siswa dengan status online dihitung realtime (< 90 detik)
 router.get('/', async (req, res) => {
     try {
         const sql = `
@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
-                       WHEN updated_at >= NOW() - INTERVAL '40 seconds' THEN 'online'
+                       WHEN updated_at >= NOW() - INTERVAL '90 seconds' THEN 'online'
                        ELSE 'offline'
                    END AS status,
                    updated_at
@@ -102,7 +102,7 @@ router.get('/:nisn', async (req, res) => {
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
-                       WHEN updated_at >= NOW() - INTERVAL '40 seconds' THEN 'online'
+                       WHEN updated_at >= NOW() - INTERVAL '90 seconds' THEN 'online'
                        ELSE 'offline'
                    END AS status,
                    updated_at
@@ -155,10 +155,10 @@ router.post('/', async (req, res) => {
             s.jenisKelamin || 'Laki-laki', s.passwordHash,
             parseFloat(s.lat) || -7.2588, parseFloat(s.lng) || 112.7430, s.area || 'Genteng Surabaya',
             s.rutePerjalanan || 'Kawasan Pusat -> SMAN 5', s.noWa || '',
-            s.status || 'tersedia'
+            s.status || 'online'
         ];
         await pool.query(sql, vals);
-        const created = { ...s, id: studentId, absen: parseInt(s.absen) || 1, lat: parseFloat(s.lat) || -7.2588, lng: parseFloat(s.lng) || 112.7430 };
+        const created = { ...s, id: studentId, absen: parseInt(s.absen) || 1, lat: parseFloat(s.lat) || -7.2588, lng: parseFloat(s.lng) || 112.7430, status: 'online' };
         res.status(201).json({ success: true, message: 'Siswa berhasil ditambahkan.', data: created });
     } catch (err) {
         console.error('POST /students error:', err.message);
@@ -169,6 +169,7 @@ router.post('/', async (req, res) => {
 // PUT /api/students/:id — Update data siswa (misal: update koordinat GPS, status online/offline, dll)
 router.put('/:id', async (req, res) => {
     const s = req.body;
+    const targetId = req.params.id;
     try {
         const sql = `
             UPDATE siswa SET
@@ -180,11 +181,11 @@ router.put('/:id', async (req, res) => {
                 no_wa = COALESCE(?, no_wa),
                 status = COALESCE(?, status),
                 updated_at = CURRENT_TIMESTAMP
-            WHERE id = ?
+            WHERE id = ? OR nisn = ?
         `;
         const vals = [
             s.nama, s.kelas, s.lat, s.lng, s.area, s.noWa, s.status,
-            req.params.id
+            targetId, targetId
         ];
         const [result] = await pool.query(sql, vals);
         if (result.affectedRows === 0) {
@@ -201,15 +202,16 @@ router.put('/:id', async (req, res) => {
 router.post('/:id/heartbeat', async (req, res) => {
     try {
         const { lat, lng } = req.body || {};
+        const targetId = req.params.id;
         if (lat && lng) {
             await pool.query(
-                "UPDATE siswa SET status = 'online', lat = ?, lng = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                [parseFloat(lat), parseFloat(lng), req.params.id]
+                "UPDATE siswa SET status = 'online', lat = ?, lng = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? OR nisn = ?",
+                [parseFloat(lat), parseFloat(lng), targetId, targetId]
             );
         } else {
             await pool.query(
-                "UPDATE siswa SET status = 'online', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
-                [req.params.id]
+                "UPDATE siswa SET status = 'online', updated_at = CURRENT_TIMESTAMP WHERE id = ? OR nisn = ?",
+                [targetId, targetId]
             );
         }
         res.json({ success: true, status: 'online' });
@@ -221,8 +223,9 @@ router.post('/:id/heartbeat', async (req, res) => {
 // POST /api/students/:id/status — Update status online/offline (bisa dipanggil via sendBeacon saat tab ditutup)
 router.post('/:id/status', async (req, res) => {
     const status = req.body && req.body.status ? req.body.status : 'offline';
+    const targetId = req.params.id;
     try {
-        await pool.query('UPDATE siswa SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [status, req.params.id]);
+        await pool.query('UPDATE siswa SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? OR nisn = ?', [status, targetId, targetId]);
         res.json({ success: true, status });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });

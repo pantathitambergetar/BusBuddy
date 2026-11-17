@@ -74,9 +74,15 @@ const ApiService = {
     async sendHeartbeat(data = {}) {
         const user = window.App && App.currentUser;
         if (!user || user.peran !== 'siswa' || !this.isOnline) return;
-        return await this._fetch(`/students/${user.id}/heartbeat`, {
+        const targetId = user.id || user.nisn;
+        const payload = { ...data };
+        if (!payload.lat && window.NavigationModule && NavigationModule.userCoords) {
+            payload.lat = NavigationModule.userCoords[0];
+            payload.lng = NavigationModule.userCoords[1];
+        }
+        return await this._fetch(`/students/${targetId}/heartbeat`, {
             method: 'POST',
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
     },
 
