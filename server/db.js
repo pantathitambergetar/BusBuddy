@@ -28,9 +28,9 @@ async function query(sql, params = []) {
     const pgSql = sql.replace(/\?/g, () => `$${paramIdx++}`);
     const res = await rawPool.query(pgSql, params);
 
-    // Jika ini query SELECT: elemen pertama adalah array rows
-    // Jika query UPDATE/DELETE/INSERT: elemen pertama adalah object result dengan affectedRows
-    const isSelect = /^\s*SELECT/i.test(pgSql);
+    // Jika ini query SELECT atau ada RETURNING: elemen pertama adalah array rows
+    // Jika query UPDATE/DELETE/INSERT biasa: elemen pertama adalah object result dengan affectedRows
+    const isSelect = /^\s*SELECT/i.test(pgSql) || /\bRETURNING\b/i.test(pgSql);
     const primary = isSelect ? res.rows : { affectedRows: res.rowCount, rowCount: res.rowCount, rows: res.rows };
 
     const tuple = [primary, res];

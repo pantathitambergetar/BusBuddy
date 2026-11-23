@@ -195,6 +195,18 @@ const ApiService = {
             }
         }
         return { students, teachers, requests };
+    },
+
+    // 6. Fitur Nebeng via WhatsApp
+    async createNebeng(data) {
+        return await this._fetch('/nebeng', { method: 'POST', body: JSON.stringify(data) });
+    },
+    async updateNebengStatus(id, status) {
+        return await this._fetch(`/nebeng/${id}/status`, { method: 'PUT', body: JSON.stringify({ status }) });
+    },
+    async getActiveNebeng(wa, nama) {
+        const q = wa ? `wa=${encodeURIComponent(wa)}` : `nama=${encodeURIComponent(nama || '')}`;
+        return await this._fetch(`/nebeng/active?${q}`);
     }
 };
 

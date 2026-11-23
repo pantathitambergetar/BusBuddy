@@ -2,10 +2,18 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "index.html,style.css,js/**"
+      "includeFiles": "index.html,style.css,js/**,nebeng.html,lib/**"
     }
   },
   "rewrites": [
+    {
+      "source": "/nebeng/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/status-saya",
+      "destination": "/api/index.js"
+    },
     {
       "source": "/api/(.*)",
       "destination": "/api/index.js"

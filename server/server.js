@@ -18,6 +18,7 @@ const teachersRouter = require('./routes/teachers');
 const requestsRouter = require('./routes/requests');
 const authRouter     = require('./routes/auth');
 const migrateRouter  = require('./routes/migrate');
+const nebengRouter   = require('./routes/nebeng');
 
 const app  = express();
 const PORT = process.env.SERVER_PORT || 3000;
@@ -87,6 +88,22 @@ async function ensureTablesExist() {
                 created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
             );
             CREATE INDEX IF NOT EXISTS idx_requests_student_id ON tebengan_requests (student_id);
+
+            CREATE TABLE IF NOT EXISTS nebeng (
+                id              SERIAL          PRIMARY KEY,
+                peminta_nama    VARCHAR(100)    NOT NULL,
+                peminta_wa      VARCHAR(25)     NOT NULL,
+                pemberi_nama    VARCHAR(100)    NOT NULL,
+                pemberi_wa      VARCHAR(25)     NOT NULL,
+                titik_jemput    VARCHAR(255)    DEFAULT 'Kawasan SMAN 5 Surabaya',
+                jam_berangkat   VARCHAR(50)     DEFAULT '06:30 WIB',
+                status          VARCHAR(20)     DEFAULT 'pending',
+                created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP,
+                updated_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
+            );
+            CREATE INDEX IF NOT EXISTS idx_nebeng_peminta_wa ON nebeng (peminta_wa);
+            CREATE INDEX IF NOT EXISTS idx_nebeng_pemberi_wa ON nebeng (pemberi_wa);
+            CREATE INDEX IF NOT EXISTS idx_nebeng_status ON nebeng (status);
         `);
         dbInitialized = true;
         console.log('✅ Skema tabel database BusBuddy terverifikasi.');
@@ -116,7 +133,14 @@ app.get('/index.html', (req, res) => {
 app.get('/style.css', (req, res) => {
     res.sendFile(path.join(rootDir, 'style.css'));
 });
+app.get('/nebeng/:id', (req, res) => {
+    res.sendFile(path.join(rootDir, 'nebeng.html'));
+});
+app.get('/status-saya', (req, res) => {
+    res.sendFile(path.join(rootDir, 'index.html'));
+});
 app.use('/js', express.static(path.join(rootDir, 'js')));
+app.use('/lib', express.static(path.join(rootDir, 'lib')));
 
 // ==============================================================================
 // RATE LIMITER: Anti-DDoS & Perlindungan Brute-Force
@@ -138,6 +162,7 @@ app.use('/api/students', studentsRouter);
 app.use('/api/teachers', teachersRouter);
 app.use('/api/requests', requestsRouter);
 app.use('/api/migrate',  migrateRouter);
+app.use('/api/nebeng',   nebengRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

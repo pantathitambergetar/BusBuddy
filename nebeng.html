@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Persetujuan Nebeng - BusBuddy SMAN 5 Surabaya</title>
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0f172a 100%);
+            min-height: 100vh;
+            min-height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+            overflow-y: auto;
+            color: var(--text-main);
+        }
+        .approval-container {
+            width: 100%;
+            max-width: 480px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            animation: card-in 0.3s ease-out;
+        }
+        @keyframes card-in {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .approval-header {
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .approval-header-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+        .approval-body {
+            padding: 22px 20px;
+        }
+        .detail-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 13px;
+        }
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+        .detail-icon {
+            font-size: 18px;
+            width: 24px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+        .detail-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+        .detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0f172a;
+        }
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .status-pending { background: #fef3c7; color: #b45309; }
+        .status-approved { background: #dcfce7; color: #15803d; }
+        .status-rejected { background: #fee2e2; color: #b91c1c; }
+        .status-finished { background: #e0e7ff; color: #4338ca; }
+        .btn-action-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn-whatsapp-big {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: #25d366;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+            transition: all 0.2s ease;
+            margin-top: 16px;
+            width: 100%;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-whatsapp-big:hover {
+            background: #1eb956;
+            transform: translateY(-2px);
+        }
+        .loading-box {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="approval-container">
+        <!-- Header -->
+        <div class="approval-header">
+            <div class="approval-header-icon">🤝</div>
+            <h2 style="font-size:18px; font-weight:700; margin-bottom:4px;">Permintaan Nebeng Pelajar</h2>
+            <p style="font-size:12px; opacity:0.9;">BusBuddy SMAN 5 Surabaya</p>
+        </div>
+
+        <!-- Body -->
+        <div class="approval-body" id="approvalContent">
+            <div class="loading-box" id="loadingState">
+                <p style="font-size:32px; margin-bottom:8px;">⏳</p>
+                <b>Memuat data permintaan nebeng...</b>
+            </div>
+        </div>
+
+        <div style="background:#f8fafc; padding:12px; border-top:1px solid #e2e8f0; text-align:center; font-size:11px; color:#64748b;">
+            <a href="/" style="color:#2563eb; text-decoration:none; font-weight:600;">← Buka Peta BusBuddy</a>
+        </div>
+    </div>
+
+    <!-- Script Template WhatsApp -->
+    <script src="/lib/whatsappTemplates.js"></script>
+
+    <script>
+        // Ambil ID dari URL path /nebeng/[id]
+        function getRequestedId() {
+            const parts = window.location.pathname.split('/').filter(Boolean);
+            return parts[parts.length - 1];
+        }
+
+        let currentNebengData = null;
+
+        async function loadNebengDetail() {
+            const id = getRequestedId();
+            const container = document.getElementById('approvalContent');
+
+            if (!id || isNaN(id)) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:#ef4444;">
+                        <p style="font-size:36px; margin-bottom:8px;">❌</p>
+                        <b>ID Permintaan Tidak Valid</b>
+                        <p style="font-size:12px; color:#64748b; margin-top:6px;">Pastikan tautan yang Anda buka sesuai dengan yang dikirim via WhatsApp.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/nebeng/' + id);
+                const json = await res.json();
+
+                if (!json.success || !json.data) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:30px 10px; color:#ef4444;">
+                            <p style="font-size:36px; margin-bottom:8px;">🔍</p>
+                            <b>Permintaan Nebeng Tidak Ditemukan</b>
+                            <p style="font-size:12px; color:#64748b; margin-top:6px;">Data mungkin sudah dihapus atau tautan sudah kedaluwarsa.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                currentNebengData = json.data;
+                renderCard(currentNebengData);
+
+            } catch (err) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:30px 10px; color:#ef4444;">
+                        <p style="font-size:36px; margin-bottom:8px;">⚠️</p>
+                        <b>Gagal Terhubung ke Server</b>
+                        <p style="font-size:12px; color:#64748b; margin-top:6px;">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function renderCard(data) {
+            const container = document.getElementById('approvalContent');
+            const status = (data.status || 'pending').toLowerCase();
+
+            let statusHtml = '';
+            if (status === 'pending') {
+                statusHtml = '<span class="status-badge status-pending">⏳ Menunggu Jawaban</span>';
+            } else if (status === 'approved') {
+                statusHtml = '<span class="status-badge status-approved">✅ Tebengan Diterima</span>';
+            } else if (status === 'rejected') {
+                statusHtml = '<span class="status-badge status-rejected">❌ Permintaan Ditolak</span>';
+            } else if (status === 'finished') {
+                statusHtml = '<span class="status-badge status-finished">🏁 Selesai</span>';
+            }
+
+            let actionHtml = '';
+
+            if (status === 'pending') {
+                actionHtml = `
+                    <div class="btn-action-group">
+                        <button class="btn btn-primary" onclick="handleDecision('approved')" style="background:#10b981; padding:12px; font-size:13px; font-weight:700;">
+                            ✅ Terima Nebeng
+                        </button>
+                        <button class="btn btn-secondary" onclick="handleDecision('rejected')" style="background:#ef4444; color:white; border-color:#dc2626; padding:12px; font-size:13px; font-weight:700;">
+                            ❌ Tolak
+                        </button>
+                    </div>
+                `;
+            } else if (status === 'approved') {
+                const waText = WhatsappTemplates.templateDiterima({
+                    namaA: data.peminta_nama,
+                    jam: data.jam_berangkat
+                });
+                const waLink = WhatsappTemplates.createWaLink(data.peminta_wa, waText);
+
+                actionHtml = `
+                    <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:14px; margin-top:16px; text-align:center;">
+                        <b style="color:#15803d; font-size:13px;">🎉 Tebengan Berhasil Diterima!</b>
+                        <p style="font-size:12px; color:#475569; margin:6px 0 12px 0;">
+                            Kirim konfirmasi ke <b>${data.peminta_nama}</b> via WhatsApp agar temanmu tahu tebengan diterima.
+                        </p>
+                        <a href="${waLink}" target="_blank" class="btn-whatsapp-big">
+                            💬 Kirim Konfirmasi Diterima via WhatsApp
+                        </a>
+                    </div>
+                `;
+            } else if (status === 'rejected') {
+                actionHtml = `
+                    <div style="background:#fef2f2; border:1px solid #fecaca; border-radius:10px; padding:12px; margin-top:16px; text-align:center; color:#991b1b; font-size:12px;">
+                        Permintaan tebengan ini telah <b>ditolak</b>.
+                    </div>
+                `;
+            } else if (status === 'finished') {
+                actionHtml = `
+                    <div style="background:#e0e7ff; border:1px solid #c7d2fe; border-radius:10px; padding:12px; margin-top:16px; text-align:center; color:#3730a3; font-size:12px;">
+                        Perjalanan nebeng ini telah <b>selesai</b>. Terima kasih!
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                    <span style="font-size:11px; color:#64748b;">ID Tebengan: <b>#${data.id}</b></span>
+                    ${statusHtml}
+                </div>
+
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:6px 14px; margin-bottom:14px;">
+                    <div class="detail-row">
+                        <div class="detail-icon">🎒</div>
+                        <div>
+                            <div class="detail-label">Peminta Nebeng:</div>
+                            <div class="detail-value">${data.peminta_nama}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">🚗</div>
+                        <div>
+                            <div class="detail-label">Pemberi Nebeng:</div>
+                            <div class="detail-value">${data.pemberi_nama}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">📍</div>
+                        <div>
+                            <div class="detail-label">Titik Jemput:</div>
+                            <div class="detail-value">${data.titik_jemput || 'Kawasan SMAN 5'}</div>
+                        </div>
+                    </div>
+                    <div class="detail-row">
+                        <div class="detail-icon">⏰</div>
+                        <div>
+                            <div class="detail-label">Jam Berangkat:</div>
+                            <div class="detail-value">${data.jam_berangkat || '06:30 WIB'}</div>
+                        </div>
+                    </div>
+                </div>
+
+                ${actionHtml}
+            `;
+        }
+
+        async function handleDecision(decision) {
+            if (!currentNebengData) return;
+            const id = currentNebengData.id;
+
+            try {
+                const res = await fetch('/api/nebeng/' + id + '/status', {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ status: decision })
+                });
+                const json = await res.json();
+
+                if (json.success && json.data) {
+                    currentNebengData = json.data;
+                    renderCard(currentNebengData);
+                } else {
+                    alert('Gagal memperbarui status: ' + (json.message || 'Error server'));
+                }
+            } catch (e) {
+                alert('Terjadi kesalahan koneksi: ' + e.message);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadNebengDetail);
+    </script>
+</body>
+</html>

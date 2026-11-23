@@ -43,7 +43,6 @@ const App = {
         const online = await ApiService.checkServer();
         if (online) {
             if (this.currentUser && this.currentUser.peran === 'siswa') {
-                // Kirim heartbeat DULU sebelum syncAll agar updated_at di DB sudah fresh
                 const c = NavigationModule.userCoords;
                 const hbId = this.currentUser.id || this.currentUser.nisn;
                 await ApiService._fetch(`/students/${hbId}/heartbeat`, {
@@ -52,6 +51,7 @@ const App = {
                 });
             }
             await ApiService.syncAll();
+            await RidesModule.syncActiveNebeng();
             console.log("📊 Data berhasil disinkronkan dari database.");
         }
 
@@ -89,6 +89,7 @@ const App = {
         setInterval(async () => {
             if (ApiService.isOnline && this.currentUser && !document.hidden) {
                 await ApiService.syncAll();
+                await RidesModule.syncActiveNebeng();
                 this.renderFriendsList();
             }
         }, 8000);
@@ -228,6 +229,7 @@ const App = {
     requestRide(id) { RidesModule.requestRide(id); },
     offerRideTo(id) { RidesModule.offerRideTo(id); },
     openWhatsAppChat(id) { RidesModule.openWhatsAppChat(id); },
+    finishNebeng(id) { RidesModule.finishNebeng(id); },
 
     renderDeveloperTools() { AdminModule.renderDeveloperTools(); },
     openDevAddUserModal() { AdminModule.openModal(); },
