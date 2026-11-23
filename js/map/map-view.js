@@ -106,7 +106,7 @@ const MapView = {
                             🚗 Ajak Berangkat
                         </button>
                         <button onclick="App.requestRide('${student.id}')" style="flex:1; background:#0284c7; color:white; border:none; padding:6px 8px; border-radius:6px; font-weight:600; cursor:pointer; font-size:11px;">
-                            🙋 Minta Bareng
+                            🙋 Minta Nebeng
                         </button>
                         <button onclick="MapManager.routeToDestination(${student.lat}, ${student.lng}, '${student.nama}')" style="background:#1e3a8a; color:white; border:none; padding:6px 8px; border-radius:6px; font-weight:600; cursor:pointer; font-size:11px;">
                             🗺️ Rute
