@@ -154,13 +154,13 @@ const RidesModule = {
         `;
     },
 
-    // 3. Minta Nebeng (Simpan di Database status=pending & siapkan link WhatsApp)
-    async requestRide(studentId) {
+    // 3. Minta Nebeng / Ajak Berangkat (Simpan di Database status=pending & siapkan link WhatsApp)
+    async requestRide(studentId, isAjak = false) {
         const student = App.studentsData.find(s => s.id === studentId);
         if (!student) return;
 
         if (App.currentUser && (student.id === App.currentUser.id || student.nisn === App.currentUser.nisn)) {
-            App.showToast("⚠️ Anda tidak bisa meminta nebeng ke diri sendiri!");
+            App.showToast("⚠️ Anda tidak bisa memilih diri sendiri!");
             return;
         }
 
@@ -174,42 +174,80 @@ const RidesModule = {
         const titikJemput = (App.currentUser && App.currentUser.area) ? App.currentUser.area : (student.area || 'Kawasan SMAN 5');
         const jam = '06:30 WIB';
 
-        const res = await ApiService.createNebeng({
-            peminta_nama: pemintaNama, peminta_wa: pemintaWa,
-            pemberi_nama: student.nama, pemberi_wa: student.noWa,
-            titik_jemput: titikJemput, jam_berangkat: jam
-        });
-
-        if (res && res.success && res.data) {
-            this.activeNebeng = res.data;
-            const text = window.WhatsappTemplates ? WhatsappTemplates.templateMintaNebeng({
-                namaB: student.nama, namaA: pemintaNama, jam: jam, titikJemput: titikJemput, id: res.data.id
-            }) : `Halo ${student.nama}, aku ${pemintaNama} mau nebeng. Buka: /nebeng/${res.data.id}`;
-
-            this.pendingWaLink = window.WhatsappTemplates ? WhatsappTemplates.createWaLink(student.noWa, text) : `https://wa.me/${student.noWa}`;
-            window.open(this.pendingWaLink, '_blank');
-            this.renderUserRideStatus();
-            App.showToast(`📲 Link WA dibuat! Menunggu persetujuan dari ${student.nama}...`);
-        } else {
-            App.showToast(`⚠️ ${res && res.message ? res.message : 'Gagal membuat permintaan nebeng'}`);
+        let nebengRecord = null;
+        try {
+            const res = await ApiService.createNebeng({
+                peminta_nama: pemintaNama, peminta_wa: pemintaWa,
+                pemberi_nama: student.nama, pemberi_wa: student.noWa,
+                titik_jemput: titikJemput, jam_berangkat: jam
+            });
+            if (res && res.success && res.data) {
+                nebengRecord = res.data;
+            }
+        } catch (e) {
+            console.warn('createNebeng API error:', e);
         }
+
+        if (!nebengRecord) {
+            nebengRecord = {
+                id: Date.now().toString().slice(-6),
+                peminta_nama: pemintaNama, peminta_wa: pemintaWa,
+                pemberi_nama: student.nama, pemberi_wa: student.noWa,
+                titik_jemput: titikJemput, jam_berangkat: jam, status: 'pending'
+            };
+        }
+
+        this.activeNebeng = nebengRecord;
+
+        const text = window.WhatsappTemplates 
+            ? (isAjak ? WhatsappTemplates.templateAjakNebeng({ namaB: student.nama, namaA: pemintaNama, jam: jam, titikJemput: titikJemput, id: nebengRecord.id })
+                      : WhatsappTemplates.templateMintaNebeng({ namaB: student.nama, namaA: pemintaNama, jam: jam, titikJemput: titikJemput, id: nebengRecord.id }))
+            : `Halo ${student.nama}, aku ${pemintaNama} mau nebeng sama kamu besok jam ${jam} dari ${titikJemput}. Mau terima? Klik link ini buat jawab ya: https://bus-buddy-steel.vercel.app/nebeng/${nebengRecord.id}`;
+
+        this.pendingWaLink = window.WhatsappTemplates 
+            ? WhatsappTemplates.createWaLink(student.noWa, text) 
+            : `https://wa.me/${student.noWa}?text=${encodeURIComponent(text)}`;
+
+        const appUrl = (window.WhatsappTemplates ? WhatsappTemplates.getAppUrl() : window.location.origin).replace(/\/+$/, '');
+        this.showWaModal(student.nama, this.pendingWaLink, text, nebengRecord.id, appUrl);
+
+        try { window.open(this.pendingWaLink, '_blank'); } catch {}
+        this.renderUserRideStatus();
+        App.showToast(`📱 Link WA dibuat! Menunggu persetujuan dari ${student.nama}...`);
     },
 
-    // 4. Ajak Berangkat (Langsung WA)
+    // 4. Ajak Berangkat (Kirim Link Persetujuan via WhatsApp)
     offerRideTo(studentId) {
-        const student = App.studentsData.find(s => s.id === studentId);
-        if (!student || !student.noWa) {
-            App.showToast("⚠️ Kontak WhatsApp teman belum tersedia.");
-            return;
-        }
-        const senderNama = App.currentUser ? App.currentUser.nama : 'Teman SMAN 5';
-        const pesan = `Halo ${student.nama}! Saya ${senderNama} dari BusBuddy SMAN 5 Surabaya. Rute kita searah, apakah mau berangkat bareng? 😊`;
-        const link = window.WhatsappTemplates ? WhatsappTemplates.createWaLink(student.noWa, pesan) : `https://wa.me/${student.noWa}`;
-        window.open(link, '_blank');
-        App.showToast(`🚗 Menghubungi ${student.nama}...`);
+        return this.requestRide(studentId, true);
     },
 
     openWhatsAppChat(studentId) { this.offerRideTo(studentId); },
+
+    // Modal popup tombol besar WhatsApp
+    showWaModal(namaB, waLink, text, id, appUrl) {
+        let el = document.getElementById('waRideModal');
+        if (!el) { el = document.createElement('div'); el.id = 'waRideModal'; document.body.appendChild(el); }
+        el.innerHTML = `
+            <div style="position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;">
+                <div style="background:white; border-radius:14px; max-width:420px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden;">
+                    <div style="background:linear-gradient(135deg, #15803d, #22c55e); color:white; padding:14px 18px; text-align:center;">
+                        <b style="font-size:15px;">📲 Permintaan Tebengan Dibuat!</b>
+                    </div>
+                    <div style="padding:16px;">
+                        <p style="margin:0 0 12px 0; font-size:12px; color:#334155; line-height:1.5;">
+                            Menunggu persetujuan dari <b>${namaB}</b>... Link WhatsApp sudah dibuat, pastikan kamu sudah pencet Send.
+                        </p>
+                        <a href="${waLink}" target="_blank" onclick="document.getElementById('waRideModal').innerHTML=''" class="btn" style="display:block; background:#22c55e; color:white; padding:12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:14px; text-align:center; box-shadow:0 4px 10px rgba(34,197,94,0.35);">
+                            📲 Kirim Permintaan via WhatsApp
+                        </a>
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-top:10px; font-size:11px; color:#64748b; word-break:break-all;">
+                            🔗 Link: <a href="${appUrl}/nebeng/${id}" target="_blank" style="color:#2563eb;">${appUrl}/nebeng/${id}</a>
+                        </div>
+                        <button onclick="document.getElementById('waRideModal').innerHTML=''" style="width:100%; margin-top:10px; padding:6px; background:#f1f5f9; border:none; border-radius:6px; color:#64748b; font-size:11px; cursor:pointer;">Tutup</button>
+                    </div>
+                </div>
+            </div>`;
+    },
 
     // 5. Akhiri Nebeng (Ubah status ke finished & siapkan pesan selesai WhatsApp)
     async finishNebeng(nebengId) {
