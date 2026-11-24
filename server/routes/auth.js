@@ -1,7 +1,7 @@
 /**
  * ==============================================================================
  * BUSBUDDY - ROUTES AUTHENTICATION & LOGIN (routes/auth.js)
- * POST /api/auth/login   → Login terpadu (Siswa, Guru, Developer) langsung ke MySQL
+ * POST /api/auth/login   → Login terpadu (Siswa, Guru, Developer) langsung ke PostgreSQL
  * ==============================================================================
  */
 const express = require('express');
@@ -39,10 +39,11 @@ router.post('/login', async (req, res) => {
     // 1. Cek Developer
     if (identifier.toLowerCase() === AKUN_DEVELOPER.username.toLowerCase() || identifier === AKUN_DEVELOPER.id) {
         if (password === AKUN_DEVELOPER.masterPassword) {
+            const { masterPassword, ...safeUser } = AKUN_DEVELOPER;
             return res.json({
                 success: true,
                 message: 'Login Developer berhasil!',
-                user: { ...AKUN_DEVELOPER }
+                user: safeUser
             });
         } else {
             return res.status(401).json({ success: false, message: 'Kata sandi Developer salah!' });
@@ -72,7 +73,6 @@ router.post('/login', async (req, res) => {
                 absen:          row.absen,
                 jenisKelamin:   row.jenis_kelamin,
                 peran:          'siswa',
-                passwordHash:   row.password_hash,
                 lat:            parseFloat(row.lat),
                 lng:            parseFloat(row.lng),
                 area:           row.area,
@@ -87,7 +87,7 @@ router.post('/login', async (req, res) => {
             });
         }
 
-        // 4. Cek Guru di Database MySQL
+        // 4. Cek Guru di Database PostgreSQL
         const [teachers] = await pool.query('SELECT * FROM guru WHERE nip = ?', [identifier]);
         if (teachers.length > 0) {
             const row = teachers[0];
@@ -98,7 +98,6 @@ router.post('/login', async (req, res) => {
                 jabatan:      row.jabatan,
                 jenisKelamin: row.jenis_kelamin,
                 peran:        'guru',
-                passwordHash: row.password_hash,
                 noWa:         row.no_wa || '',
                 area:         row.area
             };

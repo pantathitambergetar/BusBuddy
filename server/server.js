@@ -147,9 +147,18 @@ app.get('/status-saya', (req, res) => {
 // ==============================================================================
 // RATE LIMITER: Anti-DDoS & Perlindungan Brute-Force
 // ==============================================================================
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 30,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { success: false, message: 'Terlalu banyak percobaan login. Coba lagi dalam 15 menit.' }
+});
+app.use('/api/auth', loginLimiter);
+
 const apiLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000,  // 15 menit
-    max: 200,                   // Maks 200 request per IP per 15 menit
+    windowMs: 15 * 60 * 1000,
+    max: 2000,
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, message: 'Terlalu banyak request. Coba lagi dalam 15 menit.' }

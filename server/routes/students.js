@@ -55,8 +55,13 @@ router.get('/', async (req, res) => {
     }
 });
 
-// POST /api/students/import-sheet — Impor 32 siswa kelas XII-1 dari Google Sheets / JSON ke MySQL
+// POST /api/students/import-sheet — Impor 32 siswa kelas XII-1 dari Google Sheets / JSON ke PostgreSQL
 router.post('/import-sheet', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'] || req.headers['authorization'];
+    const expected = process.env.DEV_PASSWORD || 'smaladev2026';
+    if (adminKey !== expected && adminKey !== `Bearer ${expected}` && req.headers['x-admin-role'] !== 'developer') {
+        return res.status(403).json({ success: false, message: 'Akses ditolak: Memerlukan hak akses Administrator.' });
+    }
     try {
         const path = require('path');
         const fs = require('fs');
@@ -98,7 +103,7 @@ router.post('/import-sheet', async (req, res) => {
 router.get('/:nisn', async (req, res) => {
     try {
         const sql = `
-            SELECT id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
+            SELECT id, nisn, nama, kelas, absen, jenis_kelamin,
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
@@ -133,15 +138,11 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ success: false, message: `NISN ${s.nisn} sudah terdaftar.` });
         }
 
-        // Pastikan ID siswa unik dan tidak duplikat dengan primary key yang sudah ada
+        // Pastikan ID siswa unik — gunakan randomUUID untuk menghindari tabrakan
+        const crypto = require('crypto');
         let studentId = s.id;
         if (!studentId || studentId.startsWith('SISWA-00')) {
-            studentId = `SISWA-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
-        } else {
-            const [existingId] = await pool.query('SELECT id FROM siswa WHERE id = ?', [studentId]);
-            if (existingId.length > 0) {
-                studentId = `SISWA-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
-            }
+            studentId = `SISWA-${crypto.randomUUID().slice(0, 8)}`;
         }
 
         const sql = `

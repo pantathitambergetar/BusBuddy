@@ -85,4 +85,21 @@ assert.strictEqual(publicStudent.passwordHash, undefined, 'passwordHash tidak bo
 assert.strictEqual(publicStudent.password_hash, undefined, 'password_hash tidak boleh ada di objek publik');
 console.log('✅ 8. Proteksi Kebocoran Password Hash: PASS');
 
-console.log('\n🎉 SEMUA 8 PENGUJIAN INTI BERHASIL! (ALL PASS)');
+// 9. Uji Tidak Ada Master Password di Bundle Client
+const constantsCode = require('fs').readFileSync(require('path').join(__dirname, '../js/config/constants.js'), 'utf8');
+assert.ok(!constantsCode.includes('masterPassword'), 'constants.js tidak boleh memuat masterPassword');
+console.log('✅ 9. Proteksi Kredensial Developer di Frontend: PASS');
+
+// 10. Uji Verifikasi Caller Update Status Nebeng
+function verifyNebengCaller(callerWa, record) {
+    if (!callerWa) return true; // Opsional jika tanpa caller_wa
+    const clean = WhatsappTemplates.formatWaNumber(callerWa);
+    return clean === record.peminta_wa || clean === record.pemberi_wa;
+}
+const mockNebeng = { peminta_wa: '6281234567890', pemberi_wa: '6289876543210' };
+assert.strictEqual(verifyNebengCaller('081234567890', mockNebeng), true, 'Peminta sah harus diizinkan');
+assert.strictEqual(verifyNebengCaller('089876543210', mockNebeng), true, 'Pemberi sah harus diizinkan');
+assert.strictEqual(verifyNebengCaller('081111111111', mockNebeng), false, 'Orang luar harus ditolak');
+console.log('✅ 10. Verifikasi Pihak Terlibat Nebeng: PASS');
+
+console.log('\n🎉 SEMUA 10 PENGUJIAN INTI BERHASIL! (ALL PASS)');

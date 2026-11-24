@@ -19,7 +19,6 @@ const AKUN_DEVELOPER = {
     nama: "Tim IT Developer BusBuddy SMAN 5",
     jabatan: "Administrator Sistem",
     peran: "developer",
-    masterPassword: "smaladev2026",
     noWa: ""
 };
 

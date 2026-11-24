@@ -152,10 +152,11 @@ router.get('/:id', async (req, res) => {
 });
 
 // 4. PUT /api/nebeng/:id/status — Update status (approved, rejected, finished)
+//    Verifikasi: caller_wa harus cocok dengan peminta_wa atau pemberi_wa
 router.put('/:id/status', async (req, res) => {
     await ensureNebengTableExists();
     const id = parseInt(req.params.id, 10);
-    const { status } = req.body || {};
+    const { status, caller_wa } = req.body || {};
 
     const validStatuses = ['pending', 'approved', 'rejected', 'finished'];
     if (!status || !validStatuses.includes(status)) {
@@ -166,6 +167,18 @@ router.put('/:id/status', async (req, res) => {
     }
 
     try {
+        // Verifikasi caller adalah pihak yang terlibat
+        const [existing] = await pool.query('SELECT peminta_wa, pemberi_wa FROM nebeng WHERE id = ?', [id]);
+        if (!existing || existing.length === 0) {
+            return res.status(404).json({ success: false, message: 'Data nebeng tidak ditemukan.' });
+        }
+        if (caller_wa) {
+            const cleanCaller = WhatsappTemplates.formatWaNumber(caller_wa);
+            if (cleanCaller !== existing[0].peminta_wa && cleanCaller !== existing[0].pemberi_wa) {
+                return res.status(403).json({ success: false, message: 'Akses ditolak: Anda bukan pihak dalam nebeng ini.' });
+            }
+        }
+
         const sql = `
             UPDATE nebeng
             SET status = ?, updated_at = CURRENT_TIMESTAMP
@@ -173,9 +186,6 @@ router.put('/:id/status', async (req, res) => {
             RETURNING id, peminta_nama, peminta_wa, pemberi_nama, pemberi_wa, titik_jemput, jam_berangkat, status, updated_at
         `;
         const [rows] = await pool.query(sql, [status, id]);
-        if (!rows || rows.length === 0) {
-            return res.status(404).json({ success: false, message: 'Data nebeng tidak ditemukan.' });
-        }
         res.json({
             success: true,
             message: `Status nebeng berhasil diubah menjadi '${status}'.`,

@@ -47,7 +47,7 @@ const AuthModule = {
         if (clean.toLowerCase() === 'developer') {
             hintEl.innerHTML = `💻 <i>Akses Administrator: Masukkan kata sandi master developer</i>`;
         } else if (clean.length >= 5) {
-            hintEl.innerHTML = `💡 Password: <b style="color:#2563eb; background:#eff6ff; padding:2px 6px; border-radius:4px;">${generatePasswordFromID(clean)}</b>`;
+            hintEl.innerHTML = `💡 Format: <b>smala</b> + 5 digit terakhir nomor identitas Anda`;
         } else {
             hintEl.innerHTML = `<i>Format password: <b>smala</b> + 5 digit terakhir nomor identitas</i>`;
         }
@@ -58,7 +58,7 @@ const AuthModule = {
         if (!hintEl) return;
         const clean = (val || '').trim();
         if (clean.length >= 5) {
-            hintEl.innerHTML = `🔑 Password otomatis: <b style="color:#059669;">${generatePasswordFromID(clean)}</b>`;
+            hintEl.innerHTML = `🔑 Password otomatis: <b>smala</b> + 5 digit terakhir nomor identitas`;
         } else {
             hintEl.innerHTML = `<i>Masukkan minimal 5 digit nomor identitas</i>`;
         }
@@ -94,30 +94,17 @@ const AuthModule = {
             return;
         }
 
-        // A. Akun Developer
-        if (identifier.toLowerCase() === AKUN_DEVELOPER.username.toLowerCase() || identifier === AKUN_DEVELOPER.id) {
-            if (password === AKUN_DEVELOPER.masterPassword) {
-                App.currentUser = { ...AKUN_DEVELOPER };
-                StorageManager.saveSession(App.currentUser);
-                App.checkAuthStatus();
-                NavigationModule.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Developer (SMAN 5)');
-                if (MapView.map) MapView.map.setView([SEKOLAH_DATA.lat, SEKOLAH_DATA.lng], 15);
-                App.renderAll();
-                App.showToast("💻 Mode Developer Aktif!");
+        // A. Cek Format Password Sekolah (skip untuk akun developer)
+        const isDeveloper = identifier.toLowerCase() === AKUN_DEVELOPER.username.toLowerCase() || identifier === AKUN_DEVELOPER.id;
+        if (!isDeveloper) {
+            const expectedPassword = generatePasswordFromID(identifier);
+            if (password !== expectedPassword) {
+                alert('❌ Kata sandi tidak sesuai!\nFormat: "smala" + 5 digit terakhir nomor identitas.');
                 return;
             }
-            alert("❌ Kata sandi Developer salah!");
-            return;
         }
 
-        // B. Cek Format Password Sekolah
-        const expectedPassword = generatePasswordFromID(identifier);
-        if (password !== expectedPassword) {
-            alert(`❌ Kata sandi tidak sesuai!\nFormat: "smala" + 5 digit terakhir nomor identitas.\nContoh: ${expectedPassword}`);
-            return;
-        }
-
-        // C. Cari di Database MySQL (Online) atau Cache Lokal
+        // B. Cari di Database PostgreSQL (Online) atau Cache Lokal
         let matchedUser = null;
         if (ApiService.isOnline) {
             const apiRes = await ApiService.login(identifier, password);
@@ -130,6 +117,16 @@ const AuthModule = {
                     App.teachersData.push(matchedUser);
                     StorageManager.saveCollection(StorageManager.KEYS.TEACHERS, App.teachersData);
                 }
+            if (matchedUser && matchedUser.peran === 'developer') {
+                App.currentUser = { ...matchedUser };
+                StorageManager.saveSession(App.currentUser);
+                App.checkAuthStatus();
+                NavigationModule.setUserLocation(SEKOLAH_DATA.lat, SEKOLAH_DATA.lng, 'Developer (SMAN 5)');
+                if (MapView.map) MapView.map.setView([SEKOLAH_DATA.lat, SEKOLAH_DATA.lng], 15);
+                App.renderAll();
+                App.showToast("💻 Mode Developer Aktif!");
+                return;
+            }
             } else if (apiRes && !apiRes.success && apiRes.code !== 'NOT_FOUND') {
                 alert(`❌ ${apiRes.message}`);
                 return;

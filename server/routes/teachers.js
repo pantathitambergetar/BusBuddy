@@ -48,15 +48,11 @@ router.post('/', async (req, res) => {
             return res.status(409).json({ success: false, message: `NIP ${g.nip} sudah terdaftar.` });
         }
 
-        // Pastikan ID guru unik agar tidak bentrok primary key
+        // Pastikan ID guru unik — gunakan randomUUID untuk menghindari tabrakan
+        const crypto = require('crypto');
         let teacherId = g.id;
         if (!teacherId || teacherId.startsWith('GURU-00')) {
-            teacherId = `GURU-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
-        } else {
-            const [existingId] = await pool.query('SELECT id FROM guru WHERE id = ?', [teacherId]);
-            if (existingId.length > 0) {
-                teacherId = `GURU-${Date.now().toString().slice(-6)}${Math.floor(Math.random() * 900 + 100)}`;
-            }
+            teacherId = `GURU-${crypto.randomUUID().slice(0, 8)}`;
         }
 
         const sql = `

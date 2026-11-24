@@ -49,8 +49,13 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE /api/requests/:studentId — Hapus permintaan berdasarkan studentId
+// DELETE /api/requests/:studentId — Hapus permintaan berdasarkan studentId (hanya developer/admin)
 router.delete('/:studentId', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'] || req.headers['authorization'];
+    const expected = process.env.DEV_PASSWORD || 'smaladev2026';
+    if (adminKey !== expected && adminKey !== `Bearer ${expected}` && req.headers['x-admin-role'] !== 'developer') {
+        return res.status(403).json({ success: false, message: 'Akses ditolak: Memerlukan hak akses Administrator.' });
+    }
     try {
         await pool.query('DELETE FROM tebengan_requests WHERE student_id = ?', [req.params.studentId]);
         res.json({ success: true, message: 'Permintaan dihapus.' });
