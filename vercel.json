@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "index.html,style.css,js/**,nebeng.html,lib/**,server/**"
+      "includeFiles": ["index.html", "style.css", "js/**", "nebeng.html", "lib/**", "server/**"]
     }
   },
   "rewrites": [
@@ -16,6 +16,10 @@
     },
     {
       "source": "/api/(.*)",
+      "destination": "/api/index.js"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/api/index.js"
     }
   ]
