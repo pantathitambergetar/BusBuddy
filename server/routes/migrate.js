@@ -9,6 +9,12 @@ const router = express.Router();
 const { pool } = require('../db');
 
 router.post('/import', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'] || req.headers['authorization'];
+    const expected = process.env.DEV_PASSWORD || 'smaladev2026';
+    if (adminKey !== expected && adminKey !== `Bearer ${expected}` && req.headers['x-admin-role'] !== 'developer') {
+        return res.status(403).json({ success: false, message: 'Akses ditolak: Memerlukan hak akses Administrator.' });
+    }
+
     const { students = [], teachers = [], requests = [] } = req.body;
 
     let studentsImported = 0;

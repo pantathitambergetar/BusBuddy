@@ -33,10 +33,14 @@ const ApiService = {
 
     async _fetch(endpoint, options = {}) {
         const url = `${this.BASE_URL}${endpoint}`;
+        const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+        if (typeof window !== 'undefined' && window.App && App.currentUser && App.currentUser.peran === 'developer') {
+            headers['x-admin-role'] = 'developer';
+        }
         try {
             const res = await fetch(url, {
                 ...options,
-                headers: { 'Content-Type': 'application/json', ...(options.headers || {}) }
+                headers
             });
             return await res.json();
         } catch (err) {

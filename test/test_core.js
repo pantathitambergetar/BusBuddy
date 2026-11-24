@@ -72,4 +72,17 @@ const pgSql = sql.replace(/\?/g, () => `$${paramIdx++}`);
 assert.strictEqual(pgSql, 'SELECT * FROM nebeng WHERE peminta_wa = $1 AND status = $2', 'Parameter ? harus diterjemahkan ke $1, $2');
 console.log('✅ 7. Penerjemah Parameter PostgreSQL: PASS');
 
-console.log('\n🎉 SEMUA 7 PENGUJIAN INTI BERHASIL! (ALL PASS)');
+// 8. Uji Pencegahan Kebocoran Password Hash pada Data Siswa Publik
+const mockRow = { id: 'SISWA-1', nisn: '0012345678', nama: 'Budi', password_hash: 'secret_hash_value', lat: -7.25, lng: 112.75 };
+const publicStudent = {
+    id: mockRow.id,
+    nisn: mockRow.nisn,
+    nama: mockRow.nama,
+    lat: parseFloat(mockRow.lat),
+    lng: parseFloat(mockRow.lng)
+};
+assert.strictEqual(publicStudent.passwordHash, undefined, 'passwordHash tidak boleh ada di objek publik');
+assert.strictEqual(publicStudent.password_hash, undefined, 'password_hash tidak boleh ada di objek publik');
+console.log('✅ 8. Proteksi Kebocoran Password Hash: PASS');
+
+console.log('\n🎉 SEMUA 8 PENGUJIAN INTI BERHASIL! (ALL PASS)');

@@ -18,7 +18,6 @@ function rowToTeacher(row) {
         jabatan:      row.jabatan,
         jenisKelamin: row.jenis_kelamin,
         peran:        'guru',
-        passwordHash: row.password_hash,
         noWa:         row.no_wa || '',
         area:         row.area
     };
@@ -27,7 +26,7 @@ function rowToTeacher(row) {
 // GET /api/teachers
 router.get('/', async (req, res) => {
     try {
-        const [rows] = await pool.query('SELECT * FROM guru ORDER BY created_at DESC');
+        const [rows] = await pool.query('SELECT id, nip, nama, jabatan, jenis_kelamin, no_wa, area FROM guru ORDER BY created_at DESC');
         res.json({ success: true, data: rows.map(rowToTeacher) });
     } catch (err) {
         console.error('GET /teachers error:', err.message);
@@ -79,8 +78,13 @@ router.post('/', async (req, res) => {
     }
 });
 
-// DELETE /api/teachers/:id
+// DELETE /api/teachers/:id — Hapus guru (hanya developer/admin)
 router.delete('/:id', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'] || req.headers['authorization'];
+    const expected = process.env.DEV_PASSWORD || 'smaladev2026';
+    if (adminKey !== expected && adminKey !== `Bearer ${expected}` && req.headers['x-admin-role'] !== 'developer') {
+        return res.status(403).json({ success: false, message: 'Akses ditolak: Memerlukan hak akses Administrator.' });
+    }
     try {
         const [result] = await pool.query('DELETE FROM guru WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) {

@@ -21,7 +21,6 @@ function rowToStudent(row) {
         kelas:          row.kelas,
         absen:          row.absen,
         jenisKelamin:   row.jenis_kelamin,
-        passwordHash:   row.password_hash,
         lat:            parseFloat(row.lat),
         lng:            parseFloat(row.lng),
         area:           row.area,
@@ -37,7 +36,7 @@ router.get('/', async (req, res) => {
     try {
         // Gunakan interval longgar (5 menit) agar toleran terhadap delay network & cold start Vercel
         const sql = `
-            SELECT id, nisn, nama, kelas, absen, jenis_kelamin, password_hash,
+            SELECT id, nisn, nama, kelas, absen, jenis_kelamin,
                    lat, lng, area, rute_perjalanan, no_wa,
                    CASE 
                        WHEN status = 'offline' THEN 'offline'
@@ -233,8 +232,13 @@ router.post('/:id/status', async (req, res) => {
     }
 });
 
-// DELETE /api/students/:id — Hapus siswa (oleh developer)
+// DELETE /api/students/:id — Hapus siswa (hanya developer/admin)
 router.delete('/:id', async (req, res) => {
+    const adminKey = req.headers['x-admin-key'] || req.headers['authorization'];
+    const expected = process.env.DEV_PASSWORD || 'smaladev2026';
+    if (adminKey !== expected && adminKey !== `Bearer ${expected}` && req.headers['x-admin-role'] !== 'developer') {
+        return res.status(403).json({ success: false, message: 'Akses ditolak: Memerlukan hak akses Administrator.' });
+    }
     try {
         const [result] = await pool.query('DELETE FROM siswa WHERE id = ?', [req.params.id]);
         if (result.affectedRows === 0) {
