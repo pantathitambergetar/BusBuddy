@@ -227,26 +227,17 @@ const RidesModule = {
     showWaModal(namaB, waLink, text, id, appUrl) {
         let el = document.getElementById('waRideModal');
         if (!el) { el = document.createElement('div'); el.id = 'waRideModal'; document.body.appendChild(el); }
-        el.innerHTML = `
-            <div style="position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;">
-                <div style="background:white; border-radius:14px; max-width:420px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden;">
-                    <div style="background:linear-gradient(135deg, #15803d, #22c55e); color:white; padding:14px 18px; text-align:center;">
-                        <b style="font-size:15px;">📲 Permintaan Tebengan Dibuat!</b>
-                    </div>
-                    <div style="padding:16px;">
-                        <p style="margin:0 0 12px 0; font-size:12px; color:#334155; line-height:1.5;">
-                            Menunggu persetujuan dari <b>${namaB}</b>... Link WhatsApp sudah dibuat, pastikan kamu sudah pencet Send.
-                        </p>
-                        <a href="${waLink}" target="_blank" onclick="document.getElementById('waRideModal').innerHTML=''" class="btn" style="display:block; background:#22c55e; color:white; padding:12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:14px; text-align:center; box-shadow:0 4px 10px rgba(34,197,94,0.35);">
-                            📲 Kirim Permintaan via WhatsApp
-                        </a>
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-top:10px; font-size:11px; color:#64748b; word-break:break-all;">
-                            🔗 Link: <a href="${appUrl}/nebeng/${id}" target="_blank" style="color:#2563eb;">${appUrl}/nebeng/${id}</a>
-                        </div>
-                        <button onclick="document.getElementById('waRideModal').innerHTML=''" style="width:100%; margin-top:10px; padding:6px; background:#f1f5f9; border:none; border-radius:6px; color:#64748b; font-size:11px; cursor:pointer;">Tutup</button>
-                    </div>
+        el.innerHTML = `<div style="position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:99999; display:flex; align-items:center; justify-content:center; padding:16px;">
+            <div style="background:white; border-radius:14px; max-width:420px; width:100%; box-shadow:0 20px 40px rgba(0,0,0,0.3); overflow:hidden;">
+                <div style="background:linear-gradient(135deg, #15803d, #22c55e); color:white; padding:14px 18px; text-align:center;"><b style="font-size:15px;">📲 Permintaan Tebengan Dibuat!</b></div>
+                <div style="padding:16px;">
+                    <p style="margin:0 0 12px 0; font-size:12px; color:#334155; line-height:1.5;">Menunggu persetujuan dari <b>${namaB}</b>... Link WhatsApp sudah dibuat, pastikan kamu sudah pencet Send.</p>
+                    <a href="${waLink}" target="_blank" onclick="document.getElementById('waRideModal').innerHTML=''" class="btn" style="display:block; background:#22c55e; color:white; padding:12px; border-radius:8px; font-weight:700; text-decoration:none; font-size:14px; text-align:center; box-shadow:0 4px 10px rgba(34,197,94,0.35);">📲 Kirim Permintaan via WhatsApp</a>
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:8px; margin-top:10px; font-size:11px; color:#64748b; word-break:break-all;">🔗 Link: <a href="${appUrl}/nebeng/${id}" target="_blank" style="color:#2563eb;">${appUrl}/nebeng/${id}</a></div>
+                    <button onclick="document.getElementById('waRideModal').innerHTML=''" style="width:100%; margin-top:10px; padding:6px; background:#f1f5f9; border:none; border-radius:6px; color:#64748b; font-size:11px; cursor:pointer;">Tutup</button>
                 </div>
-            </div>`;
+            </div>
+        </div>`;
     },
 
     // 5. Akhiri Nebeng (Ubah status ke finished & siapkan pesan selesai WhatsApp)
@@ -279,22 +270,17 @@ const RidesModule = {
             App.showToast("📍 Aktifkan GPS untuk melihat rekomendasi terdekat!");
             return;
         }
-
         const currentId = App.currentUser ? App.currentUser.id : null;
         const candidates = App.studentsData
             .filter(s => currentId ? s.id !== currentId : true)
             .map(s => ({ ...s, _dist: NavigationModule.getDistanceKm(NavigationModule.userCoords[0], NavigationModule.userCoords[1], s.lat, s.lng) }))
             .sort((a, b) => a._dist - b._dist).slice(0, 3);
-
         if (candidates.length === 0) return;
 
         let html = `<div style="font-size:11px; font-weight:700; color:#92400e; background:#fef3c7; padding:4px 8px; border-radius:6px; margin-bottom:6px;">🎯 Rekomendasi Terdekat</div>`;
         candidates.forEach((s, i) => {
             html += `<div style="background:white; border:1px solid #fde68a; border-left:3px solid #f59e0b; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px;">
-                <div style="display:flex; justify-content:space-between;">
-                    <b>#${i+1} ${s.nama} (${s.kelas})</b>
-                    <span style="color:#92400e; font-weight:700;">📍 ${s._dist.toFixed(1)} km</span>
-                </div>
+                <div style="display:flex; justify-content:space-between;"><b>#${i+1} ${s.nama} (${s.kelas})</b><span style="color:#92400e; font-weight:700;">📍 ${s._dist.toFixed(1)} km</span></div>
                 <div style="margin-top:4px; display:flex; gap:4px;">
                     <button class="btn btn-primary" style="font-size:10px; padding:3px 6px;" onclick="App.offerRideTo('${s.id}')">🚗 Ajak</button>
                     <button class="btn btn-primary" style="background:#0284c7;" onclick="App.requestRide('${s.id}')">🙋 Minta Nebeng</button>
