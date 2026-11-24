@@ -5,13 +5,10 @@
  */
 
 const SecurityUtil = {
-    // 1. Sanitasi Input: Melindungi dari SQL Injection & Cross-Site Scripting (XSS)
+    // 1. Sanitasi Input: Melindungi dari Cross-Site Scripting (XSS) pada tampilan HTML
     sanitize(input) {
         if (typeof input !== 'string') return input;
         return input
-            .replace(/['";\\]/g, '')           // Hapus karakter pemutus string SQL
-            .replace(/--/g, '')                 // Hapus penanda komentar SQL
-            .replace(/\/\*[\s\S]*?\*\//g, '')   // Hapus komentar multi-line
             .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '') // Mencegah script execution
             .replace(/[<>]/g, '')               // Hapus kurung sudut HTML
             .trim();

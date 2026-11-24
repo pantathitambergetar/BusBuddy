@@ -13,8 +13,10 @@ const router = express.Router();
 const { pool } = require('../db');
 const WhatsappTemplates = require('../../lib/whatsappTemplates');
 
-// Helper memastikan tabel nebeng ada di database PostgreSQL
+// Helper memastikan tabel nebeng ada di database PostgreSQL (dieksekusi maksimal 1x per instance)
+let nebengTableChecked = false;
 async function ensureNebengTableExists() {
+    if (nebengTableChecked) return;
     try {
         await pool.query(`
             CREATE TABLE IF NOT EXISTS nebeng (
@@ -33,6 +35,7 @@ async function ensureNebengTableExists() {
             CREATE INDEX IF NOT EXISTS idx_nebeng_pemberi_wa ON nebeng (pemberi_wa);
             CREATE INDEX IF NOT EXISTS idx_nebeng_status ON nebeng (status);
         `);
+        nebengTableChecked = true;
     } catch (e) {
         console.error('Error creating nebeng table:', e.message);
     }

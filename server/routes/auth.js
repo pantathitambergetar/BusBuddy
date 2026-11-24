@@ -15,7 +15,7 @@ const AKUN_DEVELOPER = {
     nama: "Tim IT Developer BusBuddy SMAN 5",
     jabatan: "Administrator Sistem",
     peran: "developer",
-    masterPassword: "smaladev2026",
+    masterPassword: process.env.DEV_PASSWORD || "smaladev2026",
     noWa: "6281211112222",
     avatar: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=100&auto=format&fit=crop&q=60"
 };
@@ -54,7 +54,7 @@ router.post('/login', async (req, res) => {
     if (password !== expectedPassword) {
         return res.status(401).json({
             success: false,
-            message: `Kata sandi tidak sesuai! Format kata sandi adalah "smala" + 5 digit terakhir nomor identitas Anda. Contoh: ${expectedPassword}`
+            message: 'Nomor Identitas atau Kata Sandi salah.'
         });
     }
 

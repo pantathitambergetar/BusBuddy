@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server/server.js",
     "dev": "node server/server.js",
-    "migrate": "node server/migrate.js"
+    "migrate": "node server/migrate.js",
+    "test": "node test/test_core.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
