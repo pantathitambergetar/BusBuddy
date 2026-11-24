@@ -176,18 +176,6 @@ app.get('/api/health', (req, res) => {
     });
 });
 
-// Debug: filesystem check (temporary — remove after verifying deployment)
-app.get('/api/debug-fs', (req, res) => {
-    const fs = require('fs');
-    const info = { __dirname, rootDir, exists: {} };
-    for (const f of ['style.css', 'index.html', 'js', 'js/auth/auth.js', 'lib', 'lib/whatsappTemplates.js', 'nebeng.html']) {
-        try { info.exists[f] = fs.existsSync(path.join(rootDir, f)); } catch { info.exists[f] = 'error'; }
-    }
-    try { info.rootContents = fs.readdirSync(rootDir); } catch (e) { info.rootContents = e.message; }
-    try { info.jsContents = fs.readdirSync(path.join(rootDir, 'js')); } catch (e) { info.jsContents = e.message; }
-    res.json(info);
-});
-
 // 404 handler untuk route yang tidak dikenal
 app.use((req, res) => {
     res.status(404).json({ success: false, message: `Endpoint '${req.path}' tidak ditemukan.` });
