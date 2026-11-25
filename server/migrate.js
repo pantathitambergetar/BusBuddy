@@ -76,6 +76,9 @@ async function runMigration() {
                 created_at      TIMESTAMPTZ     DEFAULT CURRENT_TIMESTAMP
             );
             CREATE INDEX IF NOT EXISTS idx_requests_student_id ON tebengan_requests (student_id);
+            ALTER TABLE siswa ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE guru ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE tebengan_requests ENABLE ROW LEVEL SECURITY;
         `);
         console.log('✅ Tabel `tebengan_requests` terverifikasi.');
 

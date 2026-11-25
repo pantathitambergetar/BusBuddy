@@ -34,6 +34,7 @@ async function ensureNebengTableExists() {
             CREATE INDEX IF NOT EXISTS idx_nebeng_peminta_wa ON nebeng (peminta_wa);
             CREATE INDEX IF NOT EXISTS idx_nebeng_pemberi_wa ON nebeng (pemberi_wa);
             CREATE INDEX IF NOT EXISTS idx_nebeng_status ON nebeng (status);
+            ALTER TABLE nebeng ENABLE ROW LEVEL SECURITY;
         `);
         nebengTableChecked = true;
     } catch (e) {

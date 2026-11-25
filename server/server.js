@@ -104,6 +104,12 @@ async function ensureTablesExist() {
             CREATE INDEX IF NOT EXISTS idx_nebeng_peminta_wa ON nebeng (peminta_wa);
             CREATE INDEX IF NOT EXISTS idx_nebeng_pemberi_wa ON nebeng (pemberi_wa);
             CREATE INDEX IF NOT EXISTS idx_nebeng_status ON nebeng (status);
+
+            -- Aktifkan Row-Level Security agar PostgREST/anon Supabase tidak bisa akses publik
+            ALTER TABLE siswa ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE guru ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE tebengan_requests ENABLE ROW LEVEL SECURITY;
+            ALTER TABLE nebeng ENABLE ROW LEVEL SECURITY;
         `);
         dbInitialized = true;
         console.log('✅ Skema tabel database BusBuddy terverifikasi.');

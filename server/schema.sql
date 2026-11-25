@@ -58,3 +58,8 @@ CREATE TABLE IF NOT EXISTS tebengan_requests (
 );
 
 CREATE INDEX IF NOT EXISTS idx_requests_student_id ON tebengan_requests (student_id);
+
+-- Aktifkan Row-Level Security (default-deny untuk akses publik PostgREST/Supabase)
+ALTER TABLE siswa ENABLE ROW LEVEL SECURITY;
+ALTER TABLE guru ENABLE ROW LEVEL SECURITY;
+ALTER TABLE tebengan_requests ENABLE ROW LEVEL SECURITY;
