@@ -192,13 +192,22 @@ body {
 }
 
 .sidebar {
-    width: 390px;
-    background: var(--bg-light);
-    border-right: 1px solid var(--border-color);
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    bottom: 12px;
+    width: 376px;
+    background: rgba(255, 255, 255, 0.74);
+    backdrop-filter: blur(18px) saturate(175%);
+    -webkit-backdrop-filter: blur(18px) saturate(175%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    border-radius: 18px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.14);
     display: flex;
     flex-direction: column;
     z-index: 500;
     min-height: 0;
+    overflow: hidden;
 }
 
 .mobile-sheet-handle {
@@ -207,10 +216,10 @@ body {
 
 .nav-tabs {
     display: flex;
-    background: var(--bg-card);
+    background: rgba(255, 255, 255, 0.55);
     padding: 6px 8px;
     gap: 4px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid rgba(211, 224, 243, 0.75);
     flex-shrink: 0;
 }
 
@@ -257,12 +266,12 @@ body {
    3. FILTER & CARDS (Komponen Teman Sekitar & Transport)
    ============================================================================== */
 .filter-box {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: var(--radius-md);
     padding: 12px;
     margin-bottom: 12px;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
 }
 
 .filter-header-row {
@@ -356,17 +365,18 @@ body {
 }
 
 .student-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.84);
+    border: 1px solid rgba(255, 255, 255, 0.92);
     border-radius: var(--radius-md);
     padding: 13px 14px;
-    box-shadow: var(--shadow-sm);
-    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     cursor: pointer;
 }
 
 .student-card:hover {
     transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.96);
     box-shadow: var(--shadow-md);
     border-color: #93c5fd;
 }
@@ -469,7 +479,9 @@ body {
    4. MAP CONTAINER & FLOATING CONTROLS
    ============================================================================== */
 #map {
-    flex: 1;
+    position: absolute;
+    inset: 0;
+    width: 100%;
     height: 100%;
     z-index: 1;
     background: #e5e7eb;
@@ -489,9 +501,11 @@ body {
 .fab-btn {
     height: 40px;
     padding: 0 14px;
-    background: rgba(255, 255, 255, 0.96);
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
     color: var(--text-main);
-    border: 1px solid var(--border-color);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 99px;
     box-shadow: var(--shadow-md);
     font-size: 12px;
@@ -1093,28 +1107,35 @@ body {
         overflow: hidden;
     }
 
-    /* Mode 1: Split Layar (Map di atas, Bottom Sheet di bawah) */
+    /* Mode 1: Split Layar (Map penuh di belakang, Frosted Glass Bottom Sheet di bawah) */
     .main-wrapper.view-split .sidebar {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: auto;
         display: flex;
         width: 100%;
-        height: 52%;
-        max-height: 52%;
+        height: 50%;
+        max-height: 50%;
         min-height: 0;
         flex: none;
-        border-right: none;
-        border-top: 1px solid var(--border-color);
-        border-top-left-radius: 16px;
-        border-top-right-radius: 16px;
-        box-shadow: 0 -6px 20px rgba(15, 23, 42, 0.1);
+        background: rgba(255, 255, 255, 0.80);
+        backdrop-filter: blur(16px) saturate(170%);
+        -webkit-backdrop-filter: blur(16px) saturate(170%);
+        border: none;
+        border-top: 1px solid rgba(255, 255, 255, 0.9);
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.14);
         overflow: hidden;
-        margin-top: -10px;
+        margin-top: 0;
     }
 
     .mobile-sheet-handle {
         display: flex;
         justify-content: center;
-        padding: 7px 0 3px;
-        background: var(--bg-card);
+        padding: 8px 0 4px;
+        background: rgba(255, 255, 255, 0.45);
         flex-shrink: 0;
     }
 
@@ -1122,18 +1143,19 @@ body {
         width: 36px;
         height: 4px;
         border-radius: 99px;
-        background: #cbd5e1;
+        background: rgba(100, 116, 139, 0.45);
     }
 
     .main-wrapper.view-split #map {
+        position: absolute;
+        inset: 0;
         display: block;
         width: 100%;
-        height: 48%;
-        flex: 1;
+        height: 100%;
     }
 
     .main-wrapper.view-split .floating-controls {
-        bottom: calc(52% + 12px);
+        bottom: calc(50% + 12px);
         right: 10px;
     }
 
@@ -1143,12 +1165,15 @@ body {
     }
 
     .main-wrapper.view-list-only .sidebar {
+        position: static !important;
         display: flex !important;
         width: 100% !important;
         height: 100% !important;
         max-height: 100% !important;
         flex: 1 !important;
-        border-top: none;
+        background: var(--bg-light);
+        backdrop-filter: none;
+        border: none;
         border-radius: 0;
         margin-top: 0;
     }
