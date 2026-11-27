@@ -195,7 +195,7 @@ const AuthModule = {
         let nama = SecurityUtil.sanitize(document.getElementById('regNama').value.trim());
         let idNumber = SecurityUtil.sanitize(document.getElementById('regIdentifier').value.trim());
         let gender = document.getElementById('regGender').value;
-        let noWa = SecurityUtil.sanitize(document.getElementById('regWa').value.trim()) || '6281299998888';
+        let rawWa = SecurityUtil.sanitize(document.getElementById('regWa').value.trim()).replace(/[\s-]/g, '');
 
         if (!nama || !idNumber) {
             alert("Harap lengkapi Nama dan Nomor Identitas.");
@@ -205,12 +205,17 @@ const AuthModule = {
             alert("Nomor Identitas harus berupa angka minimal 5 digit!");
             return;
         }
+        if (!/^\+62\d{8,13}$/.test(rawWa)) {
+            alert("Nomor WhatsApp wajib format +62 (bukan 08). Contoh: +6281234567890");
+            return;
+        }
+        const noWa = rawWa.slice(1);
 
         const autoPass = generatePasswordFromID(idNumber);
         const passHash = await SecurityUtil.hashPassword(autoPass);
 
         if (peran === 'siswa') {
-            let kelas = SecurityUtil.sanitize(document.getElementById('regKelas').value.trim()) || 'X-E 1';
+            let kelas = SecurityUtil.sanitize(document.getElementById('regKelas').value.trim()) || 'XI-1';
             let absen = parseInt(SecurityUtil.sanitize(document.getElementById('regAbsen').value.trim())) || 1;
             if (App.studentsData.some(s => s.nisn === idNumber)) {
                 alert(`NISN ${idNumber} sudah terdaftar! Silakan login di tab Masuk.`);

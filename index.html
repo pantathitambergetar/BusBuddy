@@ -124,11 +124,22 @@
                         <div id="rowSiswaFields" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                             <div class="form-group">
                                 <label class="form-label">Kelas:</label>
-                                <input type="text" id="regKelas" class="form-input" placeholder="Contoh: XI-MIPA 3" />
+                                <select id="regKelas" class="form-select">
+                                    <option value="XI-1">XI-1</option>
+                                    <option value="XI-2">XI-2</option>
+                                    <option value="XI-3">XI-3</option>
+                                    <option value="XI-4">XI-4</option>
+                                    <option value="XI-5">XI-5</option>
+                                    <option value="XI-6">XI-6</option>
+                                    <option value="XI-7">XI-7</option>
+                                    <option value="XI-8">XI-8</option>
+                                    <option value="XI-9">XI-9</option>
+                                    <option value="XI-10">XI-10</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Nomor Absen:</label>
-                                <input type="number" id="regAbsen" class="form-input" placeholder="1 – 36" min="1" max="45" />
+                                <input type="number" id="regAbsen" class="form-input" placeholder="Masukkan no absen Anda" min="1" max="45" />
                             </div>
                         </div>
 
@@ -151,7 +162,7 @@
                             </div>
                             <div class="form-group">
                                 <label class="form-label">Nomor WhatsApp (+62):</label>
-                                <input type="text" id="regWa" class="form-input" placeholder="Opsional (misal: 6281234567890)" />
+                                <input type="tel" id="regWa" class="form-input" placeholder="Contoh: +6281234567890" required />
                             </div>
                         </div>
 
