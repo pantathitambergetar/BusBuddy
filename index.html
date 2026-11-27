@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="id">    
+<html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
     <!-- Memutus identitas pelacakan agar server peta CartoDB / OSM tidak memblokir localhost -->
     <meta name="referrer" content="no-referrer">
-    
-    <title>BusBuddy SMAN 5 Surabaya - Platform Nebeng & Transportasi Pelajar</title>
-    
-    <!-- Library Peta Leaflet.js via Cloudflare CDN (Gratis & Bebas Blokir) -->
+
+    <title>BusBuddy SMAN 5 Surabaya — Nebeng &amp; Transportasi Pelajar</title>
+
+    <!-- Library Peta Leaflet.js via Cloudflare CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-    
-    <!-- File Styling Desain Web BusBuddy -->
+
+    <!-- Stylesheet Utama BusBuddy -->
     <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -23,107 +23,108 @@
          ============================================================================== -->
     <div class="auth-gatekeeper" id="authGatekeeper">
         <div class="auth-card">
-            <!-- Header Kartu Auth -->
             <div class="auth-header">
-                <div class="auth-header-icon">🚌</div>
-                <h2 style="font-size:20px; font-weight:700; margin-bottom:4px;">BusBuddy version 2.0</h2>
-                <p style="font-size:12px; opacity:0.9;">Sistem Nebeng Pelajar & Integrasi Transportasi Publik</p>
-                <div style="margin-top:10px; display:inline-block; background:rgba(255,255,255,0.15); padding:4px 12px; border-radius:20px; font-size:11px; font-weight:600;">
-                    🏫 Jl. Kusuma Bangsa No.21, Surabaya
+                <div class="auth-brand-row">
+                    <div class="auth-header-icon" aria-hidden="true">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/>
+                            <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+                            <circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>
+                        </svg>
+                    </div>
+                    <div class="auth-header-text">
+                        <h2>BusBuddy SMAN 5</h2>
+                        <p>Platform Nebeng &amp; Integrasi Transportasi Pelajar</p>
+                    </div>
+                </div>
+                <div class="auth-location-pill">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    <span>Jl. Kusuma Bangsa No. 21, Surabaya</span>
                 </div>
             </div>
 
-            <!-- Tab Menu Auth: 2 Tab Saja — Masuk dan Daftar -->
-            <div class="auth-tabs">
-                <button class="auth-tab-btn active" id="authTabBtn_login" onclick="App.switchAuthTab('login')">
-                    🔑 Login
+            <div class="auth-tabs" role="tablist">
+                <button class="auth-tab-btn active" id="authTabBtn_login" role="tab" aria-selected="true" onclick="App.switchAuthTab('login')">
+                    Masuk
                 </button>
-                <button class="auth-tab-btn" id="authTabBtn_daftar" onclick="App.switchAuthTab('daftar')">
-                    📝 Daftar
+                <button class="auth-tab-btn" id="authTabBtn_daftar" role="tab" aria-selected="false" onclick="App.switchAuthTab('daftar')">
+                    Daftar Akun
                 </button>
             </div>
 
-            <!-- Konten Kartu Auth -->
             <div class="auth-body">
-
-                <!-- PANEL 1: LOGIN TUNGGAL (SISWA, GURU, DAN DEVELOPER DALAM 1 FORM) -->
+                <!-- PANEL 1: LOGIN TUNGGAL -->
                 <div class="auth-panel" id="authPanel_login">
                     <form onsubmit="App.handleUnifiedLogin(event)">
                         <div class="form-group">
-                            <label class="form-label">Masukkan Nomor Identitas :</label>
-                            <input type="text" id="loginIdentifier" class="form-input" 
-                                   placeholder="Masukkan NISN, NIP, atau username developer" 
+                            <label class="form-label" for="loginIdentifier">Nomor Identitas (NISN / NIP)</label>
+                            <input type="text" id="loginIdentifier" class="form-input"
+                                   placeholder="Masukkan NISN, NIP, atau username"
                                    oninput="App.onLoginIdentifierChange(this.value)" required />
-                            <div id="loginPassHint" style="font-size:11px; color:#64748b; margin-top:5px;">
-                                <i>Format kata sandi: <b>smala</b> + 5 digit terakhir nomor identitas</i>
+                            <div id="loginPassHint" class="form-hint">
+                                Format kata sandi default: <b>smala</b> + 5 digit terakhir nomor identitas
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label">Kata Sandi :</label>
-                            <input type="password" id="loginPassword" class="form-input" 
+                            <label class="form-label" for="loginPassword">Kata Sandi</label>
+                            <input type="password" id="loginPassword" class="form-input"
                                    placeholder="Contoh: smala34567" required />
                         </div>
 
-                        <!-- Fitur Pengingat Login (Remember Me Auto-fill) -->
-                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px; font-size:12px; color:#475569;">
-                            <input type="checkbox" id="rememberMeCheckbox" style="cursor:pointer;" />
-                            <label for="rememberMeCheckbox" style="cursor:pointer; user-select:none;">
-                                💾 Ingat identitas saya di perangkat ini (Auto-fill saat buka web)
+                        <div class="form-checkbox-row">
+                            <input type="checkbox" id="rememberMeCheckbox" />
+                            <label for="rememberMeCheckbox">
+                                Ingat identitas saya di perangkat ini
                             </label>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px;">
-                            🚀 Masuk ke BusBuddy
+                        <button type="submit" class="btn btn-primary btn-block btn-lg">
+                            Masuk ke Peta BusBuddy
                         </button>
                     </form>
 
-                    <div style="text-align:center; margin-top:16px; font-size:12px; color:#64748b;">
-                        Belum memiliki akun terdaftar? 
-                        <a href="javascript:void(0)" onclick="App.switchAuthTab('daftar')" style="color:#2563eb; font-weight:700; text-decoration:none;">
+                    <div class="auth-switch-footer">
+                        Belum punya akun?
+                        <button type="button" class="auth-link-btn" onclick="App.switchAuthTab('daftar')">
                             Daftar di sini
-                        </a>
+                        </button>
                     </div>
                 </div>
 
-
+                <!-- PANEL 2: PENDAFTARAN -->
                 <div class="auth-panel" id="authPanel_daftar" style="display:none;">
-
                     <form onsubmit="App.handleUnifiedRegistration(event)">
+                        <input type="text" id="regHoneypot" style="display:none !important;" tabindex="-1" autocomplete="off" aria-hidden="true" />
 
-                        <!-- HONEYPOT TRAP (Perangkap Bot Tersembunyi) -->
-                        <input type="text" id="regHoneypot" style="display:none !important;" tabindex="-1" autocomplete="off" />
-
-                        <!-- PILIHAN PERAN -->
                         <div class="form-group">
-                            <label class="form-label">Daftar Sebagai:</label>
+                            <label class="form-label" for="regPeran">Daftar Sebagai</label>
                             <select id="regPeran" class="form-select" onchange="App.onRegRoleChange(this.value)">
-                                <option value="siswa">🎒 Siswa</option>
-                                <option value="guru">👨‍🏫 Guru</option>
+                                <option value="siswa">Siswa SMAN 5</option>
+                                <option value="guru">Guru SMAN 5</option>
                             </select>
                         </div>
 
-                        <!-- NAMA LENGKAP -->
                         <div class="form-group">
-                            <label class="form-label">Nama Lengkap:</label>
-                            <input type="text" id="regNama" class="form-input" placeholder="Nama lengkap" required />
+                            <label class="form-label" for="regNama">Nama Lengkap</label>
+                            <input type="text" id="regNama" class="form-input" placeholder="Nama lengkap sesuai absen" required />
                         </div>
 
-                        <!-- NOMOR IDENTITAS (NISN / NIP) — label berubah via JS -->
                         <div class="form-group">
-                            <label class="form-label" id="labelRegIdentifier">Nomor Induk Siswa Nasional (NISN):</label>
-                            <input type="text" id="regIdentifier" class="form-input" 
-                                   placeholder="Contoh: 0061234567" 
+                            <label class="form-label" id="labelRegIdentifier" for="regIdentifier">Nomor Induk Siswa Nasional (NISN)</label>
+                            <input type="text" id="regIdentifier" class="form-input"
+                                   placeholder="Contoh: 0061234567"
                                    oninput="App.onRegIdentifierChange(this.value)" required />
-                            <div id="regPassPreview" style="font-size:11px; color:#64748b; margin-top:4px;">
-                                <i>Masukkan minimal 5 digit nomor identitas</i>
+                            <div id="regPassPreview" class="form-hint">
+                                Masukkan minimal 5 digit nomor identitas
                             </div>
                         </div>
 
-                        <!-- FIELD KHUSUS SISWA: Kelas & Absen -->
-                        <div id="rowSiswaFields" style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div id="rowSiswaFields" class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">Kelas:</label>
+                                <label class="form-label" for="regKelas">Kelas</label>
                                 <select id="regKelas" class="form-select">
                                     <option value="XI-1">XI-1</option>
                                     <option value="XI-2">XI-2</option>
@@ -138,99 +139,107 @@
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Nomor Absen:</label>
+                                <label class="form-label" for="regAbsen">Nomor Absen</label>
                                 <input type="number" id="regAbsen" class="form-input" placeholder="Masukkan no absen Anda" min="1" max="45" />
                             </div>
                         </div>
 
-                        <!-- FIELD KHUSUS GURU: Jabatan/Mapel -->
                         <div id="rowGuruFields" style="display:none;">
                             <div class="form-group">
-                                <label class="form-label">Mata Pelajaran / Jabatan:</label>
+                                <label class="form-label" for="regJabatan">Mata Pelajaran / Jabatan</label>
                                 <input type="text" id="regJabatan" class="form-input" placeholder="Contoh: Guru Matematika / BK" />
                             </div>
                         </div>
 
-                        <!-- JENIS KELAMIN & NOMOR WA -->
-                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                        <div class="form-grid-2">
                             <div class="form-group">
-                                <label class="form-label">Jenis Kelamin:</label>
+                                <label class="form-label" for="regGender">Jenis Kelamin</label>
                                 <select id="regGender" class="form-select">
                                     <option value="Laki-laki">Laki-laki</option>
                                     <option value="Perempuan">Perempuan</option>
                                 </select>
                             </div>
                             <div class="form-group">
-                                <label class="form-label">Nomor WhatsApp (+62):</label>
-                                <input type="tel" id="regWa" class="form-input" placeholder="Contoh: +6281234567890" required />
+                                <label class="form-label" for="regWa">WhatsApp (+62)</label>
+                                <input type="tel" id="regWa" class="form-input" placeholder="+6281234567890" required />
                             </div>
                         </div>
 
-                        <!-- MODUL KEAMANAN SIBER: ANTI-BOT CAPTCHA -->
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:10px; margin-top:10px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                <span style="font-size:11px; font-weight:700; color:#475569;">🛡️ VERIFIKASI KEAMANAN (ANTI-BOT):</span>
-                                <button type="button" onclick="App.generateNewCaptcha()" style="background:none; border:none; color:#2563eb; font-size:11px; cursor:pointer;">
-                                    🔄 Soal Baru
+                        <div class="captcha-box">
+                            <div class="captcha-header">
+                                <span>Verifikasi Keamanan</span>
+                                <button type="button" class="captcha-refresh-btn" onclick="App.generateNewCaptcha()">
+                                    Ganti Soal
                                 </button>
                             </div>
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <span id="captchaQuestion" style="font-weight:700; color:#1e3a8a; font-size:13px; background:#eff6ff; padding:6px 10px; border-radius:4px; border:1px solid #bfdbfe;">
-                                    Hitung...
-                                </span>
-                                <input type="number" id="regCaptchaInput" class="form-input" placeholder="Jawaban" style="width:110px;" required />
+                            <div class="captcha-input-row">
+                                <span id="captchaQuestion" class="captcha-question">Hitung...</span>
+                                <input type="number" id="regCaptchaInput" class="form-input" placeholder="Jawaban" required />
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" style="width:100%; padding:12px; font-size:14px; margin-top:14px; background:#10b981;">
-                            ✨ Daftarkan Akun & Buka Peta
+                        <button type="submit" class="btn btn-teal btn-block btn-lg" style="margin-top:14px;">
+                            Daftarkan Akun &amp; Buka Peta
                         </button>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
-
     <!-- ==============================================================================
-         1. TOP NAVBAR (Bilah Menu Atas - Terbuka Setelah Login)
+         1. TOP NAVBAR
          ============================================================================== -->
     <header class="top-navbar">
         <div class="brand-section">
-            <div class="brand-icon">🚌</div>
+            <div class="brand-icon" aria-hidden="true">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/>
+                    <path d="M18 18h3s.5-1.7.8-2.8c.1-.4.2-.8.2-1.2 0-.4-.1-.8-.2-1.2l-1.4-5C20.1 6.8 19.1 6 18 6H4a2 2 0 0 0-2 2v10h3"/>
+                    <circle cx="7" cy="18" r="2"/><path d="M9 18h5"/><circle cx="16" cy="18" r="2"/>
+                </svg>
+            </div>
             <div>
                 <div class="brand-title">BusBuddy SMAN 5</div>
-                <div class="brand-subtitle">Platform Nebeng & Transportasi Publik Pelajar Surabaya</div>
+                <div class="brand-subtitle">Nebeng &amp; Transportasi Pelajar Surabaya</div>
             </div>
         </div>
 
         <div class="navbar-right">
-            <!-- Badge Profil & Peran Pengguna Aktif -->
             <div class="role-badge" id="userRoleBadge" title="Profil Akun Anda">
                 <span class="dot"></span>
                 <span>Memuat akun...</span>
             </div>
 
-            <!-- Tombol Keluar (Logout) -->
-            <button onclick="App.logout()" class="btn btn-secondary" 
-                    style="padding:6px 12px; font-size:12px; color:#dc2626; border-color:#fca5a5;" 
-                    title="Keluar dari akun dan kembali ke halaman Login">
-                🚪 Keluar (Logout)
+            <button onclick="App.logout()" class="btn-logout" title="Keluar dari akun dan kembali ke halaman Login" aria-label="Keluar dari akun">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                <span class="logout-text">Keluar</span>
             </button>
         </div>
     </header>
 
-    <!-- Bilah Alih Tampilan Khusus Layar HP / Mobile (Peta vs Daftar Menu) -->
-    <div class="mobile-view-bar" id="mobileViewBar">
+    <!-- Bilah Alih Tampilan Khusus Layar HP / Mobile -->
+    <div class="mobile-view-bar" id="mobileViewBar" role="group" aria-label="Mode tampilan layar">
         <button class="mobile-view-btn active" id="btnViewSplit" onclick="App.setMobileView('split')">
-            ⚖️ Belah Layar
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="12" x2="21" y2="12"/>
+            </svg>
+            <span>Belah Layar</span>
         </button>
         <button class="mobile-view-btn" id="btnViewList" onclick="App.setMobileView('list')">
-            📋 Daftar & Menu
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/>
+                <circle cx="4" cy="6" r="1"/><circle cx="4" cy="12" r="1"/><circle cx="4" cy="18" r="1"/>
+            </svg>
+            <span>Daftar</span>
         </button>
         <button class="mobile-view-btn" id="btnViewMap" onclick="App.setMobileView('map')">
-            🗺️ Peta Penuh
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/>
+            </svg>
+            <span>Peta Penuh</span>
         </button>
     </div>
 
@@ -238,38 +247,51 @@
          2. MAIN WRAPPER (Sidebar Kontrol & Layar Peta)
          ============================================================================== -->
     <main class="main-wrapper view-split">
-        
-        <!-- SIDEBAR PANEL KIRI -->
+
         <aside class="sidebar">
-            <!-- Tab Menu Navigasi -->
-            <nav class="nav-tabs">
+            <div class="mobile-sheet-handle" aria-hidden="true"><span></span></div>
+
+            <nav class="nav-tabs" aria-label="Menu utama">
                 <button class="tab-btn active" data-tab="tabTeman">
-                    👥 <span>Teman Sekitar</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    <span>Teman Sekitar</span>
                 </button>
                 <button class="tab-btn" data-tab="tabTransport">
-                    🚐 <span>Transport Umum</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16"/><path d="M8 18l-2 3"/><path d="M16 18l2 3"/>
+                    </svg>
+                    <span>Transport Umum</span>
                 </button>
                 <button class="tab-btn" data-tab="tabGuru" id="tabBtnGuru" style="display:none;">
-                    👨‍🏫 <span>Pantau Guru</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                    </svg>
+                    <span>Pantau Guru</span>
                 </button>
                 <button class="tab-btn" data-tab="tabDeveloper" id="tabBtnDeveloper" style="display:none;">
-                    💻 <span>Developer Tools</span>
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+                    </svg>
+                    <span>Developer</span>
                 </button>
             </nav>
 
             <!-- KONTEN TAB 1: PETA TEMAN SEKITAR & TEBENGAN -->
             <section class="tab-content active" id="tabTeman">
-                <!-- Status Perjalanan Pengguna Aktif -->
                 <div id="userRideStatusContainer"></div>
-
-                <!-- Rekomendasi Pintar Terdekat -->
                 <div id="smartRecommendationContainer"></div>
 
                 <div class="filter-box">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <div class="filter-title" style="margin-bottom:0;">Radius Jarak:</div>
-                        <button onclick="App.searchNearestRide()" class="btn btn-secondary" style="font-size:10px; padding:3px 8px;" title="Cari rekomendasi tebengan terdekat">
-                            🎯 Cari Terdekat
+                    <div class="filter-header-row">
+                        <div class="filter-title">Radius Jarak</div>
+                        <button onclick="App.searchNearestRide()" class="btn-nearest" title="Cari rekomendasi tebengan terdekat">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                                <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/>
+                            </svg>
+                            <span>Cari Terdekat</span>
                         </button>
                     </div>
                     <div class="filter-chips">
@@ -280,29 +302,24 @@
                     </div>
                 </div>
 
-                <!-- Wadah Kartu Siswa -->
-                <div class="cards-list" id="cardsContainer">
-                    <!-- Kartu siswa dirender otomatis oleh js/rides/rides.js -->
-                </div>
+                <div class="cards-list" id="cardsContainer"></div>
             </section>
 
             <!-- KONTEN TAB 2: TRANSPORTASI UMUM SURABAYA -->
             <section class="tab-content" id="tabTransport">
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:12px; font-size:12px; line-height:1.4;">
-                    <b style="color:#1e3a8a;">🚌 Integrasi Angkutan Kota Surabaya</b>
-                    <p style="color:#64748b; margin-top:4px;">
-                        Pelajar dapat memanfaatkan Feeder Wira Wiri gratis dan Suroboyo Bus dengan tarif khusus untuk menuju kawasan SMAN 5 Surabaya.
-                    </p>
+                <div class="info-banner">
+                    <div class="info-banner-title">Integrasi Angkutan Kota Surabaya</div>
+                    <p>Pelajar dapat memanfaatkan Feeder Wira Wiri gratis dan Suroboyo Bus dengan tarif khusus menuju kawasan SMAN 5 Surabaya.</p>
                 </div>
                 <div class="cards-list" id="transportContainer"></div>
             </section>
 
-            <!-- KONTEN TAB 3: DASHBOARD PANTAU GURU (KHUSUS GURU & DEVELOPER) -->
+            <!-- KONTEN TAB 3: DASHBOARD PANTAU GURU -->
             <section class="tab-content" id="tabGuru">
                 <div id="guruDashboardContainer"></div>
             </section>
 
-            <!-- KONTEN TAB 4: PANEL DEVELOPER (MANAJEMEN DATA USER) -->
+            <!-- KONTEN TAB 4: PANEL DEVELOPER -->
             <section class="tab-content" id="tabDeveloper">
                 <div id="developerContainer"></div>
             </section>
@@ -311,26 +328,35 @@
         <!-- KANVAS PETA LEAFLET -->
         <div id="map"></div>
 
-        <!-- TOMBOL KONTROL MENGAMBANG (FLOATING ACTION BUTTONS) -->
+        <!-- TOMBOL KONTROL MENGAMBANG -->
         <div class="floating-controls">
-            <!-- Tombol Bantuan Darurat (SOS) -->
-            <button class="fab-btn fab-sos" onclick="App.triggerSOSModal()" title="Tombol Darurat SOS">
-                🚨 BANTUAN SOS
+            <button class="fab-btn fab-sos" onclick="App.triggerSOSModal()" title="Tombol Darurat SOS" aria-label="Bantuan Darurat SOS">
+                <svg class="fab-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+                </svg>
+                <span class="fab-label-sos">SOS</span>
+                <span class="fab-label">Darurat</span>
             </button>
 
-            <!-- Tombol Tentukan Titik Lokasi Jemput Manual -->
-            <button class="fab-btn" onclick="MapManager.toggleLocationPicker()" style="border-color:#10b981; color:#059669;" title="Klik peta untuk menaruh pin rumah/jemput Anda">
-                🎯 Atur Titik Jemput
+            <button class="fab-btn fab-pickup" onclick="MapManager.toggleLocationPicker()" title="Klik peta untuk menaruh pin rumah/jemput Anda" aria-label="Atur titik jemput di peta">
+                <svg class="fab-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>
+                </svg>
+                <span class="fab-label">Titik Jemput</span>
             </button>
 
-            <!-- Tombol Pusatkan ke GPS Saya -->
-            <button class="fab-btn" onclick="MapManager.centerToUser()" title="Pusatkan peta ke lokasi GPS Anda">
-                📍 Posisi Saya
+            <button class="fab-btn" onclick="MapManager.centerToUser()" title="Pusatkan peta ke lokasi GPS Anda" aria-label="Pusatkan peta ke posisi saya">
+                <svg class="fab-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polygon points="3 11 22 2 13 21 11 13 3 11"/>
+                </svg>
+                <span class="fab-label">Posisi Saya</span>
             </button>
 
-            <!-- Tombol Toggle Halte Transportasi -->
-            <button class="fab-btn" onclick="MapManager.toggleTransport()" title="Sembunyikan/Tampilkan Halte Bus & Kereta">
-                🚌 Halte & Stasiun
+            <button class="fab-btn" onclick="MapManager.toggleTransport()" title="Sembunyikan/Tampilkan Halte Bus &amp; Stasiun" aria-label="Tampilkan atau sembunyikan halte dan stasiun">
+                <svg class="fab-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="4" y="3" width="16" height="15" rx="2"/><path d="M4 11h16"/><path d="M8 18l-2 3"/><path d="M16 18l2 3"/>
+                </svg>
+                <span class="fab-label">Halte &amp; Stasiun</span>
             </button>
         </div>
 
@@ -339,36 +365,36 @@
     <!-- ==============================================================================
          3. MODAL DIALOG: DEVELOPER TAMBAH USER BARU
          ============================================================================== -->
-    <div class="modal-overlay" id="devAddUserModal">
+    <div class="modal-overlay" id="devAddUserModal" role="dialog" aria-modal="true" aria-labelledby="devAddUserTitle">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">➕ Tambah Pengguna Baru (Developer)</div>
-                <button class="modal-close" onclick="App.closeDevAddUserModal()">&times;</button>
+                <div class="modal-title" id="devAddUserTitle">Tambah Pengguna Baru</div>
+                <button class="modal-close" onclick="App.closeDevAddUserModal()" aria-label="Tutup dialog">&times;</button>
             </div>
             <div class="modal-body">
                 <form onsubmit="App.submitDevAddUser(event)">
                     <div class="form-group">
-                        <label class="form-label">Tipe Pengguna:</label>
+                        <label class="form-label" for="devUserRole">Tipe Pengguna</label>
                         <select id="devUserRole" class="form-select">
                             <option value="siswa">Siswa SMAN 5</option>
                             <option value="guru">Guru SMAN 5</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nama Lengkap:</label>
+                        <label class="form-label" for="devUserNama">Nama Lengkap</label>
                         <input type="text" id="devUserNama" class="form-input" placeholder="Contoh: Gilang Ramadhan" required />
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Nomor Identitas (NISN / NIP):</label>
+                        <label class="form-label" for="devUserIDNumber">Nomor Identitas (NISN / NIP)</label>
                         <input type="text" id="devUserIDNumber" class="form-input" placeholder="Contoh: 0087654321" required />
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Kelas / Jabatan:</label>
-                        <input type="text" id="devUserExtra" class="form-input" placeholder="Contoh: XI-MIPA 2 atau Guru Fisika" />
+                        <label class="form-label" for="devUserExtra">Kelas / Jabatan</label>
+                        <input type="text" id="devUserExtra" class="form-input" placeholder="Contoh: XI-2 atau Guru Fisika" />
                     </div>
-                    <div style="display:flex; gap:8px; margin-top:14px;">
+                    <div class="modal-actions-row">
                         <button type="button" class="btn btn-secondary" onclick="App.closeDevAddUserModal()">Batal</button>
-                        <button type="submit" class="btn btn-primary" style="background:#8b5cf6;">Simpan User</button>
+                        <button type="submit" class="btn btn-primary">Simpan User</button>
                     </div>
                 </form>
             </div>
@@ -378,65 +404,54 @@
     <!-- ==============================================================================
          4. MODAL DIALOG: BANTUAN DARURAT (SOS)
          ============================================================================== -->
-    <div class="modal-overlay" id="sosModal">
+    <div class="modal-overlay" id="sosModal" role="dialog" aria-modal="true" aria-labelledby="sosModalTitle">
         <div class="modal-content">
-            <div class="modal-header" style="background:#fef2f2; border-bottom-color:#fecaca;">
-                <div class="modal-title" style="color:#b91c1c;">🚨 PUSAT BANTUAN DARURAT SISWA</div>
-                <button class="modal-close" onclick="App.closeSOSModal()">&times;</button>
+            <div class="modal-header modal-header-danger">
+                <div class="modal-title" id="sosModalTitle">Pusat Bantuan Darurat</div>
+                <button class="modal-close" onclick="App.closeSOSModal()" aria-label="Tutup dialog">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="sos-box">
-                    <b>⚠️ Keadaan Darurat di Jalan?</b><br>
-                    Gunakan fitur ini jika Anda mogok, mengalami kecelakaan, ancaman bahaya, atau terlambat genting saat menuju SMAN 5 Surabaya.
+                    <b>Keadaan Darurat di Jalan?</b><br>
+                    Gunakan fitur ini jika Anda mogok, mengalami kecelakaan, atau butuh bantuan darurat saat menuju SMAN 5 Surabaya.
                 </div>
 
-                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:12px; margin-bottom:14px; font-size:12px;">
-                    <div style="color:#64748b; font-weight:600; margin-bottom:4px;">TITIK LOKASI GPS ANDA SAAT INI:</div>
-                    <div id="sosCurrentCoord" style="font-weight:700; color:#1e293b; font-size:13px; font-family:monospace;">
-                        Mendeteksi koordinat...
-                    </div>
-                    <button onclick="App.copyLocationLink()" class="btn btn-secondary" style="margin-top:8px; width:100%;">
-                        📋 Salin Tautan Google Maps Lokasi Saya
+                <div class="sos-coord-card">
+                    <div class="sos-coord-label">Titik Lokasi GPS Saat Ini</div>
+                    <div id="sosCurrentCoord" class="sos-coord-value">Mendeteksi koordinat...</div>
+                    <button onclick="App.copyLocationLink()" class="btn btn-secondary btn-block" style="margin-top:8px;">
+                        Salin Tautan Google Maps
                     </button>
                 </div>
 
-                <div style="font-size:12px; font-weight:700; color:#475569; margin-bottom:8px;">KONTAK DARURAT RESMI:</div>
+                <div class="sos-section-title">Kontak Darurat Resmi</div>
                 <div id="sosContactsList"></div>
 
-                <button class="btn btn-secondary" onclick="App.closeSOSModal()" style="width:100%; margin-top:10px;">
+                <button class="btn btn-secondary btn-block" onclick="App.closeSOSModal()" style="margin-top:12px;">
                     Tutup
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- WADAH NOTIFIKASI TOAST MELAYANG -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- WADAH NOTIFIKASI TOAST -->
+    <div class="toast-container" id="toastContainer" aria-live="polite"></div>
 
     <!-- ==============================================================================
-         5. MODUL JAVASCRIPT PER FITUR (TERSTRUKTUR & RINGKAS)
+         5. MODUL JAVASCRIPT PER FITUR
          ============================================================================== -->
-    <!-- 1. Konfigurasi & Keamanan Dasar -->
     <script src="js/config/constants.js"></script>
     <script src="js/security/security.js"></script>
-
-    <!-- 2. Layanan Penyimpanan & API PostgreSQL -->
     <script src="js/services/storage.js"></script>
     <script src="js/services/api.js"></script>
-
-    <!-- 3. Peta & Navigasi GPS -->
     <script src="js/map/map-view.js"></script>
     <script src="js/navigation/navigation.js"></script>
-
-    <!-- 4. Modul Fitur Aplikasi & Template WhatsApp -->
     <script src="lib/whatsappTemplates.js?v=2.2"></script>
     <script src="js/auth/auth.js"></script>
     <script src="js/rides/rides.js?v=2.2"></script>
     <script src="js/admin/admin.js"></script>
     <script src="js/dashboard/dashboard.js"></script>
     <script src="js/emergency/sos.js"></script>
-
-    <!-- 5. Pengatur Utama Aplikasi -->
     <script src="js/main/app.js?v=2.2"></script>
 
 </body>

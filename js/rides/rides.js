@@ -139,7 +139,7 @@ const RidesModule = {
                 </div>
                 <div class="student-actions" onclick="event.stopPropagation()">
                     <button class="btn btn-primary" onclick="App.offerRideTo('${student.id}')">🚗 Ajak Berangkat</button>
-                    <button class="btn btn-primary" style="background:#0284c7;" onclick="App.requestRide('${student.id}')">🙋 Minta Nebeng</button>
+                    <button class="btn btn-teal" onclick="App.requestRide('${student.id}')">🙋 Minta Nebeng</button>
                 </div>
             </div>
         `;

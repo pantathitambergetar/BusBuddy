@@ -207,6 +207,13 @@ const App = {
                 this.renderFriendsList();
             });
         });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeDevAddUserModal();
+                this.closeSOSModal();
+            }
+        });
     },
 
     onUserLocationFound(lat, lng) {
