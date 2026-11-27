@@ -121,21 +121,22 @@ const RidesModule = {
         let jarakBadge = '';
         if (NavigationModule.userCoords) {
             const km = NavigationModule.getDistanceKm(NavigationModule.userCoords[0], NavigationModule.userCoords[1], student.lat, student.lng);
-            jarakBadge = `<span style="background:#f1f5f9; padding:2px 6px; border-radius:4px; font-weight:600; font-size:10px; color:#475569;">📍 ${km.toFixed(1)} km</span>`;
+            jarakBadge = `<span style="background:#eff6ff; border:1px solid #bfdbfe; padding:2px 8px; border-radius:99px; font-weight:600; font-size:11px; color:#1d4ed8;">📍 ${km.toFixed(1)} km</span>`;
         }
 
         const isOnline = (student.status || '').toLowerCase() === 'online';
         const stBadge = isOnline 
-            ? '<span style="background:#dcfce7; color:#15803d; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">🟢 Online</span>'
-            : '<span style="background:#f1f5f9; color:#64748b; font-size:10px; font-weight:700; padding:2px 6px; border-radius:10px; margin-left:6px;">⚪ Offline</span>';
+            ? '<span style="background:#dcfce7; color:#15803d; font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px;">🟢 Online</span>'
+            : '<span style="background:#f1f5f9; color:#475569; font-size:11px; font-weight:700; padding:2px 8px; border-radius:99px;">⚪ Offline</span>';
 
         return `
             <div class="student-card" onclick="MapView.map && MapView.map.setView([${student.lat}, ${student.lng}], 16)">
                 <div class="student-header">
-                    <div class="student-info">
-                        <div class="student-name">${student.nama} ${stBadge}</div>
+                    <div class="student-name">${student.nama}</div>
+                    <div class="student-meta-row">
+                        ${stBadge}
+                        ${jarakBadge}
                     </div>
-                    ${jarakBadge}
                 </div>
                 <div class="student-actions" onclick="event.stopPropagation()">
                     <button class="btn btn-primary" onclick="App.offerRideTo('${student.id}')">🚗 Ajak Berangkat</button>

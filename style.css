@@ -1,36 +1,33 @@
 /* ==============================================================================
    BUSBUDDY SMAN 5 SURABAYA - STYLESHEET UTAMA (style.css)
-   Midnight Navy & Frosted Glass — Mobile-First & Desktop Friendly
+   Bright Sunny Sky & Frosted Glass — Cheerful Student Transit UI
    ============================================================================== */
 
 :root {
-    --midnight: #0b1930;
-    --midnight-deep: #071124;
-    --midnight-surface: #132647;
-    --primary: #2563eb;
+    --primary: #2563eb;        /* Cobalt Blue Cerah */
     --primary-hover: #1d4ed8;
-    --primary-light: #60a5fa;
+    --primary-light: #3b82f6;
     --primary-soft: #eff6ff;
-    --accent-amber: #fbbf24;
+    --accent-amber: #fbbf24;   /* Kuning Cerah Bus Sekolah */
     --accent-amber-soft: #fef3c7;
     --accent-amber-text: #92400e;
-    --accent-teal: #059669;
+    --accent-teal: #059669;    /* Emerald Segar */
     --accent-teal-hover: #047857;
-    --accent-wa: #15803d;
-    --accent-wa-hover: #166534;
-    --accent-school: #d97706;
+    --accent-wa: #16a34a;
+    --accent-wa-hover: #15803d;
+    --accent-school: #f59e0b;
     --accent-sos: #dc2626;
     --accent-sos-hover: #b91c1c;
-    --bg-light: #f0f4fa;
+    --bg-light: #f0f7ff;
     --bg-card: #ffffff;
-    --bg-subtle: #e2e8f0;
+    --bg-subtle: #e0edff;
     --text-main: #0f172a;
     --text-secondary: #334155;
     --text-muted: #475569;
     --border-color: #cbd5e1;
-    --shadow-sm: 0 2px 6px rgba(7, 17, 36, 0.12);
-    --shadow-md: 0 8px 20px rgba(7, 17, 36, 0.22);
-    --shadow-lg: 0 18px 40px rgba(4, 11, 24, 0.35);
+    --shadow-sm: 0 2px 6px rgba(37, 99, 235, 0.08);
+    --shadow-md: 0 8px 20px rgba(15, 23, 42, 0.12);
+    --shadow-lg: 0 18px 40px rgba(15, 23, 42, 0.16);
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 20px;
@@ -45,8 +42,8 @@
 }
 
 ::selection {
-    background: #93c5fd;
-    color: var(--midnight-deep);
+    background: #fde68a;
+    color: var(--text-main);
 }
 
 :focus-visible {
@@ -62,15 +59,15 @@
     background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.45);
+    background: rgba(37, 99, 235, 0.28);
     border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: rgba(148, 163, 184, 0.7);
+    background: rgba(37, 99, 235, 0.48);
 }
 
 body {
-    background-color: var(--midnight-deep);
+    background-color: var(--bg-light);
     color: var(--text-main);
     overflow: hidden;
     height: 100vh;
@@ -82,12 +79,12 @@ body {
 }
 
 /* ==============================================================================
-   1. TOP NAVBAR (MIDNIGHT NAVY)
+   1. TOP NAVBAR (COBALT CERAH & AMBER)
    ============================================================================== */
 .top-navbar {
     height: 58px;
-    background: var(--midnight);
-    border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+    background: var(--primary);
+    border-bottom: 3px solid var(--accent-amber);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -107,18 +104,18 @@ body {
     width: 38px;
     height: 38px;
     background: var(--accent-amber);
-    color: var(--midnight);
+    color: #1e3a8a;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 10px rgba(251, 191, 36, 0.35);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.18);
 }
 
 .brand-title {
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
     color: #ffffff;
     letter-spacing: -0.01em;
     line-height: 1.2;
@@ -126,7 +123,7 @@ body {
 
 .brand-subtitle {
     font-size: 11px;
-    color: #94a3b8;
+    color: #dbeafe;
     font-weight: 500;
 }
 
@@ -141,24 +138,24 @@ body {
     display: flex;
     align-items: center;
     gap: 7px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.32);
     padding: 5px 12px;
     border-radius: 99px;
     font-size: 12px;
     font-weight: 600;
-    color: #f8fafc;
+    color: #ffffff;
     cursor: default;
 }
 
 .role-badge .badge-user-role {
-    color: #cbd5e1 !important;
+    color: #dbeafe !important;
 }
 
 .role-badge .dot {
     width: 8px;
     height: 8px;
-    background-color: #34d399;
+    background-color: #4ade80;
     border-radius: 50%;
     flex-shrink: 0;
 }
@@ -169,23 +166,23 @@ body {
     gap: 6px;
     padding: 6px 12px;
     min-height: 34px;
-    background: rgba(239, 68, 68, 0.16);
-    color: #fecaca;
-    border: 1px solid rgba(248, 113, 113, 0.35);
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    border: 1px solid rgba(255, 255, 255, 0.32);
     border-radius: var(--radius-sm);
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: background 0.15s ease;
 }
 
 .btn-logout:hover {
-    background: rgba(239, 68, 68, 0.28);
-    border-color: rgba(248, 113, 113, 0.6);
+    background: rgba(220, 38, 38, 0.88);
+    border-color: rgba(254, 202, 202, 0.6);
 }
 
 /* ==============================================================================
-   2. MAIN CONTAINER & FLOATING FROSTED-GLASS SIDEBAR
+   2. MAIN CONTAINER & FLOATING SKY-GLASS SIDEBAR
    ============================================================================== */
 .main-wrapper {
     display: flex;
@@ -202,10 +199,10 @@ body {
     left: 12px;
     bottom: 12px;
     width: 376px;
-    background: rgba(11, 25, 48, 0.56);
-    backdrop-filter: blur(14px) saturate(160%);
-    -webkit-backdrop-filter: blur(14px) saturate(160%);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(224, 242, 254, 0.58);
+    backdrop-filter: blur(14px) saturate(180%);
+    -webkit-backdrop-filter: blur(14px) saturate(180%);
+    border: 1.5px solid rgba(255, 255, 255, 0.85);
     border-radius: 18px;
     box-shadow: var(--shadow-lg);
     display: flex;
@@ -221,10 +218,10 @@ body {
 
 .nav-tabs {
     display: flex;
-    background: rgba(7, 17, 36, 0.45);
+    background: rgba(255, 255, 255, 0.52);
     padding: 6px 8px;
     gap: 4px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 1px solid rgba(191, 219, 254, 0.8);
     flex-shrink: 0;
 }
 
@@ -235,8 +232,8 @@ body {
     border: 1px solid transparent;
     background: transparent;
     font-size: 12px;
-    font-weight: 600;
-    color: #cbd5e1;
+    font-weight: 700;
+    color: var(--text-secondary);
     border-radius: var(--radius-sm);
     cursor: pointer;
     transition: background 0.15s ease, color 0.15s ease;
@@ -247,14 +244,14 @@ body {
 }
 
 .tab-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: rgba(255, 255, 255, 0.65);
+    color: var(--primary);
 }
 
 .tab-btn.active {
     background: var(--primary);
     color: #ffffff;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.45);
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .tab-content {
@@ -269,14 +266,15 @@ body {
 }
 
 /* ==============================================================================
-   3. FILTER & CARDS (DALAM GLASS SIDEBAR MIDNIGHT NAVY)
+   3. FILTER & CARDS
    ============================================================================== */
 .filter-box {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.68);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: var(--radius-md);
     padding: 12px;
     margin-bottom: 12px;
+    box-shadow: var(--shadow-sm);
 }
 
 .filter-header-row {
@@ -290,7 +288,7 @@ body {
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    color: #cbd5e1;
+    color: var(--text-muted);
     letter-spacing: 0.04em;
 }
 
@@ -302,15 +300,15 @@ body {
     font-size: 11px;
     font-weight: 700;
     background: var(--accent-amber);
-    color: var(--midnight);
-    border: 1px solid #fcd34d;
+    color: var(--text-main);
+    border: 1px solid #f59e0b;
     border-radius: 99px;
     cursor: pointer;
     transition: transform 0.15s ease, filter 0.15s ease;
 }
 
 .btn-nearest:hover {
-    filter: brightness(1.06);
+    filter: brightness(1.05);
     transform: translateY(-1px);
 }
 
@@ -323,29 +321,29 @@ body {
 .chip {
     padding: 6px 12px;
     font-size: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid #bfdbfe;
+    background: rgba(255, 255, 255, 0.78);
     border-radius: 99px;
     cursor: pointer;
-    color: #e2e8f0;
+    color: var(--text-secondary);
     font-weight: 600;
     transition: all 0.15s ease;
 }
 
 .chip:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.35);
+    border-color: var(--primary);
+    color: var(--primary);
 }
 
 .chip.active {
-    background: var(--accent-amber);
-    color: var(--midnight);
-    border-color: var(--accent-amber);
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
 }
 
 .info-banner {
-    background: rgba(37, 99, 235, 0.25);
-    border: 1px solid rgba(96, 165, 250, 0.4);
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid #bfdbfe;
     border-radius: var(--radius-md);
     padding: 12px 14px;
     margin-bottom: 12px;
@@ -355,12 +353,12 @@ body {
 
 .info-banner-title {
     font-weight: 700;
-    color: #ffffff;
+    color: var(--primary);
     margin-bottom: 4px;
 }
 
 .info-banner p {
-    color: #dbeafe;
+    color: var(--text-secondary);
 }
 
 .cards-list {
@@ -370,57 +368,42 @@ body {
 }
 
 .student-card {
-    background: rgba(15, 31, 61, 0.52);
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.92);
     border-radius: var(--radius-md);
     padding: 13px 14px;
-    box-shadow: 0 4px 14px rgba(4, 11, 24, 0.18);
+    box-shadow: var(--shadow-sm);
     transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
     cursor: pointer;
 }
 
 .student-card:hover {
     transform: translateY(-1px);
-    background: rgba(22, 44, 84, 0.72);
-    border-color: rgba(96, 165, 250, 0.55);
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: var(--shadow-md);
+    border-color: #60a5fa;
 }
 
 .student-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-}
-
-.student-info {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
 }
 
 .student-name {
     font-size: 14px;
     font-weight: 700;
-    color: #f8fafc;
-    line-height: 1.3;
+    color: var(--text-main);
+    line-height: 1.35;
+    word-break: break-word;
 }
 
-#tabTransport .student-card b {
-    color: #f8fafc !important;
-}
-
-#tabTransport .student-card > div:last-child {
-    color: #cbd5e1 !important;
-}
-
-#cardsContainer > div[style*="text-align:center"] {
-    color: #cbd5e1 !important;
-}
-
-#guruDashboardContainer > div[style*="color:#475569"],
-#developerContainer > div[style*="color:#334155"] {
-    color: #cbd5e1 !important;
+.student-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
 }
 
 .student-actions {
@@ -428,7 +411,7 @@ body {
     gap: 8px;
     margin-top: 10px;
     padding-top: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-top: 1px solid rgba(191, 219, 254, 0.7);
 }
 
 .btn {
@@ -437,7 +420,7 @@ body {
     min-height: 38px;
     border-radius: var(--radius-sm);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     border: 1px solid transparent;
     display: inline-flex;
@@ -487,13 +470,13 @@ body {
 }
 
 .btn-secondary {
-    background: var(--bg-subtle);
+    background: #f1f5f9;
     color: var(--text-main);
     border-color: var(--border-color);
 }
 
 .btn-secondary:hover {
-    background: #cbd5e1;
+    background: #e2e8f0;
 }
 
 /* ==============================================================================
@@ -522,15 +505,15 @@ body {
 .fab-btn {
     height: 40px;
     padding: 0 14px;
-    background: rgba(11, 25, 48, 0.72);
-    backdrop-filter: blur(12px) saturate(160%);
-    -webkit-backdrop-filter: blur(12px) saturate(160%);
-    color: #f8fafc;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(12px) saturate(170%);
+    -webkit-backdrop-filter: blur(12px) saturate(170%);
+    color: var(--text-main);
+    border: 1.5px solid rgba(255, 255, 255, 0.9);
     border-radius: 99px;
     box-shadow: var(--shadow-md);
     font-size: 12px;
-    font-weight: 600;
+    font-weight: 700;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -542,31 +525,31 @@ body {
 
 .fab-btn:hover {
     transform: translateY(-1px);
-    background: rgba(15, 34, 66, 0.88);
+    background: rgba(255, 255, 255, 0.96);
     box-shadow: var(--shadow-lg);
 }
 
 .fab-pickup {
-    border-color: rgba(52, 211, 153, 0.55);
-    color: #6ee7b7;
+    border-color: #6ee7b7;
+    color: var(--accent-teal-hover);
 }
 
 .fab-btn[onclick*="centerToUser"] {
-    border-color: rgba(96, 165, 250, 0.55);
-    color: #93c5fd;
+    border-color: #93c5fd;
+    color: var(--primary);
 }
 
 .fab-btn[onclick*="toggleTransport"] {
-    border-color: rgba(251, 191, 36, 0.55);
-    color: #fde68a;
+    border-color: #fcd34d;
+    color: var(--accent-amber-text);
 }
 
 .fab-sos {
     background: var(--accent-sos);
     color: #ffffff;
-    border-color: rgba(254, 202, 202, 0.5);
+    border-color: #fecaca;
     font-weight: 700;
-    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.4);
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.35);
 }
 
 .fab-sos:hover {
@@ -589,7 +572,7 @@ body {
     font-weight: bold;
     font-size: 14px;
     border: 2px solid white;
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.35);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.3);
 }
 
 .marker-school {
@@ -617,7 +600,7 @@ body {
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(7, 17, 36, 0.65);
+    background: rgba(15, 23, 42, 0.45);
     display: none;
     align-items: center;
     justify-content: center;
@@ -788,7 +771,7 @@ body {
 .form-input:focus, .form-select:focus {
     outline: none;
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
 }
 
 .form-checkbox-row {
@@ -821,9 +804,8 @@ body {
 }
 
 .toast {
-    background: var(--midnight);
+    background: #1e293b;
     color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.16);
     padding: 11px 16px;
     border-radius: var(--radius-sm);
     font-size: 13px;
@@ -840,15 +822,16 @@ body {
 }
 
 /* ==============================================================================
-   9. FULLSCREEN AUTH GATEKEEPER SCREEN (MIDNIGHT NAVY)
+   9. FULLSCREEN AUTH GATEKEEPER SCREEN (CERAH & SUNNY)
    ============================================================================== */
 .auth-gatekeeper {
     position: fixed;
     inset: 0;
-    background-color: var(--midnight-deep);
+    background-color: #e0f2fe;
     background-image:
-        radial-gradient(circle at 15% 18%, rgba(37, 99, 235, 0.35) 0%, transparent 45%),
-        radial-gradient(circle at 85% 82%, rgba(251, 191, 36, 0.16) 0%, transparent 42%);
+        radial-gradient(circle at 12% 16%, rgba(251, 191, 36, 0.42) 0%, transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(56, 189, 248, 0.38) 0%, transparent 45%),
+        radial-gradient(circle at 82% 14%, rgba(52, 211, 153, 0.26) 0%, transparent 38%);
     z-index: 99999;
     display: flex;
     flex-direction: column;
@@ -861,12 +844,12 @@ body {
 
 .auth-card {
     background: var(--bg-card);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: 1px solid #bfdbfe;
     width: 100%;
     max-width: 440px;
     margin: auto 0;
     border-radius: 18px;
-    box-shadow: var(--shadow-lg);
+    box-shadow: 0 20px 44px rgba(37, 99, 235, 0.14);
     overflow: hidden;
     animation: auth-fade 0.25s ease-out;
     flex-shrink: 0;
@@ -878,7 +861,7 @@ body {
 }
 
 .auth-header {
-    background: var(--midnight);
+    background: var(--primary);
     border-bottom: 4px solid var(--accent-amber);
     color: #ffffff;
     padding: 22px 22px 18px;
@@ -894,13 +877,13 @@ body {
     width: 44px;
     height: 44px;
     background: var(--accent-amber);
-    color: var(--midnight);
+    color: #1e3a8a;
     border-radius: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.3);
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
 }
 
 .auth-header-text h2 {
@@ -912,7 +895,7 @@ body {
 
 .auth-header-text p {
     font-size: 12px;
-    color: #cbd5e1;
+    color: #dbeafe;
 }
 
 .auth-location-pill {
@@ -920,12 +903,12 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.18);
     padding: 5px 11px;
     border-radius: 99px;
     font-size: 11px;
     font-weight: 600;
-    color: #f8fafc;
+    color: #ffffff;
 }
 
 .auth-tabs {
@@ -950,7 +933,7 @@ body {
 
 .auth-tab-btn.active {
     background: var(--bg-card);
-    color: var(--midnight);
+    color: var(--primary);
     box-shadow: inset 0 -2.5px 0 var(--primary);
 }
 
@@ -1016,7 +999,7 @@ body {
 
 .captcha-question {
     font-weight: 700;
-    color: var(--midnight);
+    color: var(--primary);
     font-size: 13px;
     background: var(--primary-soft);
     padding: 8px 12px;
@@ -1087,8 +1070,8 @@ body {
     /* Segmented View Switcher Mobile */
     .mobile-view-bar {
         display: flex;
-        background: var(--midnight-surface);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: var(--primary-soft);
+        border-bottom: 1px solid #bfdbfe;
         padding: 5px 10px;
         gap: 5px;
         z-index: 1100;
@@ -1104,7 +1087,7 @@ body {
         border-radius: var(--radius-sm);
         font-size: 11px;
         font-weight: 700;
-        color: #94a3b8;
+        color: var(--text-muted);
         cursor: pointer;
         touch-action: manipulation;
         display: flex;
@@ -1117,7 +1100,6 @@ body {
     .mobile-view-btn.active {
         background: var(--primary);
         color: #ffffff;
-        border-color: rgba(96, 165, 250, 0.4);
         box-shadow: var(--shadow-sm);
     }
 
@@ -1128,7 +1110,7 @@ body {
         overflow: hidden;
     }
 
-    /* Mode 1: Split Layar (Map penuh di belakang, Frosted Glass Bottom Sheet di bawah) */
+    /* Mode 1: Split Layar (Map penuh di belakang, Sky-Glass Bottom Sheet di bawah) */
     .main-wrapper.view-split .sidebar {
         position: absolute;
         left: 0;
@@ -1141,13 +1123,13 @@ body {
         max-height: 50%;
         min-height: 0;
         flex: none;
-        background: rgba(11, 25, 48, 0.62);
-        backdrop-filter: blur(14px) saturate(160%);
-        -webkit-backdrop-filter: blur(14px) saturate(160%);
+        background: rgba(224, 242, 254, 0.64);
+        backdrop-filter: blur(14px) saturate(180%);
+        -webkit-backdrop-filter: blur(14px) saturate(180%);
         border: none;
-        border-top: 1px solid rgba(255, 255, 255, 0.24);
+        border-top: 1.5px solid rgba(255, 255, 255, 0.9);
         border-radius: 20px 20px 0 0;
-        box-shadow: 0 -10px 30px rgba(4, 11, 24, 0.3);
+        box-shadow: 0 -10px 28px rgba(15, 23, 42, 0.12);
         overflow: hidden;
         margin-top: 0;
     }
@@ -1156,7 +1138,7 @@ body {
         display: flex;
         justify-content: center;
         padding: 8px 0 4px;
-        background: rgba(7, 17, 36, 0.35);
+        background: rgba(255, 255, 255, 0.45);
         flex-shrink: 0;
     }
 
@@ -1164,7 +1146,7 @@ body {
         width: 36px;
         height: 4px;
         border-radius: 99px;
-        background: rgba(255, 255, 255, 0.35);
+        background: rgba(37, 99, 235, 0.35);
     }
 
     .main-wrapper.view-split #map {
@@ -1192,7 +1174,7 @@ body {
         height: 100% !important;
         max-height: 100% !important;
         flex: 1 !important;
-        background: var(--midnight);
+        background: var(--bg-light);
         backdrop-filter: none;
         border: none;
         border-radius: 0;
