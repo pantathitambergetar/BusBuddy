@@ -134,17 +134,8 @@ const RidesModule = {
                 <div class="student-header">
                     <div class="student-info">
                         <div class="student-name">${student.nama} ${stBadge}</div>
-                        <div class="student-class">${student.kelas} • Absen ${student.absen || '-'} • NISN: ${student.nisn || '-'}</div>
                     </div>
-                </div>
-                <div class="student-body">
-                    <div class="item">
-                        <span>📍 Area: <b>${student.area || '-'}</b></span>
-                        <span style="margin-left:auto;">${jarakBadge}</span>
-                    </div>
-                    <div class="item">
-                        <span style="font-size:11px; color:#64748b;">🛣️ ${student.rutePerjalanan || '-'}</span>
-                    </div>
+                    ${jarakBadge}
                 </div>
                 <div class="student-actions" onclick="event.stopPropagation()">
                     <button class="btn btn-primary" onclick="App.offerRideTo('${student.id}')">🚗 Ajak Berangkat</button>
@@ -280,7 +271,7 @@ const RidesModule = {
         let html = `<div style="font-size:11px; font-weight:700; color:#92400e; background:#fef3c7; padding:4px 8px; border-radius:6px; margin-bottom:6px;">🎯 Rekomendasi Terdekat</div>`;
         candidates.forEach((s, i) => {
             html += `<div style="background:white; border:1px solid #fde68a; border-left:3px solid #f59e0b; border-radius:6px; padding:6px 8px; margin-bottom:6px; font-size:11px;">
-                <div style="display:flex; justify-content:space-between;"><b>#${i+1} ${s.nama} (${s.kelas})</b><span style="color:#92400e; font-weight:700;">📍 ${s._dist.toFixed(1)} km</span></div>
+                <div style="display:flex; justify-content:space-between;"><b>#${i+1} ${s.nama}</b><span style="color:#92400e; font-weight:700;">📍 ${s._dist.toFixed(1)} km</span></div>
                 <div style="margin-top:4px; display:flex; gap:4px;">
                     <button class="btn btn-primary" style="font-size:10px; padding:3px 6px;" onclick="App.offerRideTo('${s.id}')">🚗 Ajak</button>
                     <button class="btn btn-primary" style="background:#0284c7;" onclick="App.requestRide('${s.id}')">🙋 Minta Nebeng</button>

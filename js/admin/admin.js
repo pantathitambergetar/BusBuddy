@@ -13,8 +13,8 @@ const AdminModule = {
         const totalSiswa = App.studentsData.length;
         const totalGuru = App.teachersData.length;
         const dbBadge = ApiService.isOnline
-            ? '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-weight:700; font-size:10px;">🟢 MySQL Aktif</span>'
-            : '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-weight:700; font-size:10px;">🟡 MySQL Offline</span>';
+            ? '<span style="background:#dcfce7; color:#15803d; padding:2px 8px; border-radius:4px; font-weight:700; font-size:10px;">🟢 PostgreSQL Aktif</span>'
+            : '<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:4px; font-weight:700; font-size:10px;">🟡 PostgreSQL Offline</span>';
 
         container.innerHTML = `
             <div style="background:#f5f3ff; border:1px solid #ddd6fe; border-radius:8px; padding:12px; margin-bottom:14px;">
@@ -23,7 +23,7 @@ const AdminModule = {
                     ${dbBadge}
                 </div>
                 <p style="font-size:11px; color:#64748b; margin-top:4px;">
-                    Kelola data pengguna, sinkronisasi MySQL, dan kontrol penuh basis data BusBuddy.
+                    Kontrol penuh basis data PostgreSQL BusBuddy.
                 </p>
                 <div style="display:flex; gap:10px; margin-top:8px; font-size:11px; font-weight:600;">
                     <span style="background:#e0e7ff; color:#3730a3; padding:2px 8px; border-radius:4px;">Total Siswa: ${totalSiswa}</span>
@@ -34,15 +34,6 @@ const AdminModule = {
             <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px;">
                 <button onclick="App.openDevAddUserModal()" class="btn btn-primary" style="background:#8b5cf6; font-size:11px;">
                     ➕ Tambah User Baru
-                </button>
-                <button onclick="App.importGoogleSheetStudents()" class="btn btn-primary" style="background:#0284c7; font-size:11px;" title="Muat 32 data siswa kelas XII-1 dari Google Sheets">
-                    📥 Impor Siswa XII-1
-                </button>
-                <button onclick="App.migrateDataToMySQL()" class="btn btn-primary" style="background:#059669; font-size:11px;" title="Kirim seluruh data lokal ke MySQL">
-                    🔄 Migrasikan ke MySQL
-                </button>
-                <button onclick="MapManager.simulateTripToSchool()" class="btn btn-secondary" style="font-size:11px;">
-                    🚀 Tes Simulasi GPS
                 </button>
             </div>
 
@@ -203,53 +194,7 @@ const AdminModule = {
         App.showToast(`🗑️ Data ${nama} berhasil dihapus.`);
     },
 
-    // 4. Migrasi Data ke MySQL
-    async migrateDataToMySQL() {
-        App.showToast("⏳ Memeriksa koneksi database MySQL...");
-        const isOnline = await ApiService.checkServer();
-        if (!isOnline) {
-            alert("⚠️ Server API / Database MySQL belum aktif!\n\nNyalakan MySQL di XAMPP lalu jalankan 'npm start' di folder server.");
-            this.renderDeveloperTools();
-            return;
-        }
-
-        const konfirmasi = confirm(`Kirim seluruh data (${App.studentsData.length} Siswa, ${App.teachersData.length} Guru) ke MySQL?`);
-        if (!konfirmasi) return;
-
-        App.showToast("⏳ Sedang memigrasikan data ke MySQL...");
-        const res = await ApiService.importMigration(App.studentsData, App.teachersData, App.requestsData);
-        if (res && res.success) {
-            await ApiService.syncAll();
-            App.renderAll();
-            App.showToast("🎉 Seluruh data berhasil dimigrasikan ke MySQL!");
-            alert(`🎉 MIGRASI KE MYSQL SELESAI!\n\n${res.message}`);
-        } else {
-            alert("❌ Gagal migrasi: " + (res ? res.message : 'Kesalahan jaringan'));
-        }
-    },
-
-    // 5. Impor Data Google Sheets
-    async importGoogleSheetStudents() {
-        if (!App.currentUser || App.currentUser.peran !== 'developer') {
-            App.showToast("⛔ Hanya Developer yang dapat mengimpor data!");
-            return;
-        }
-        App.showToast("⏳ Sedang memuat 32 siswa kelas XII-1 dari Google Sheets...");
-        const result = await ApiService.importGoogleSheetStudents();
-        if (result && result.success && result.data) {
-            App.studentsData = result.data;
-            StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, App.studentsData);
-            App.renderFriendsList();
-            this.renderDeveloperTools();
-            const info = result.inMySQL ? 'Database MySQL & Browser' : 'Penyimpanan Mandiri (Lokal)';
-            App.showToast(`🎉 ${result.count} siswa kelas XII-1 berhasil ditampilkan di peta!`);
-            alert(`🎉 IMPOR SELESAI!\n\nSebanyak ${result.count} siswa kelas XII-1 berhasil dimasukkan ke sistem (${info}).`);
-        } else {
-            alert("❌ Gagal memuat data siswa: " + (result ? result.message : 'Kesalahan koneksi'));
-        }
-    },
-
-    // 6. Reset Pabrik
+    // 4. Reset Pabrik
     resetFactoryData() {
         if (!confirm("⚠️ PERINGATAN: Seluruh data siswa dan guru akan dihapus bersih. Lanjutkan?")) return;
         StorageManager.clearAll();

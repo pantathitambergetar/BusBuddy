@@ -236,8 +236,6 @@ const App = {
     closeDevAddUserModal() { AdminModule.closeModal(); },
     submitDevAddUser(e) { AdminModule.submitAddUser(e); },
     devDeleteUser(role, id, nama) { AdminModule.devDeleteUser(role, id, nama); },
-    migrateDataToMySQL() { AdminModule.migrateDataToMySQL(); },
-    importGoogleSheetStudents() { AdminModule.importGoogleSheetStudents(); },
     resetFactoryData() { AdminModule.resetFactoryData(); },
 
     renderGuruDashboard() { DashboardModule.renderGuruDashboard(); },
