@@ -11,8 +11,6 @@ const NavigationModule = {
     routeLayer: null,
     isManualLocation: false,
     isPickingLocation: false,
-    simulationTimer: null,
-    simulatedMarker: null,
 
     // 1. Pelacak GPS Otomatis
     gpsWatchId: null,
@@ -212,60 +210,6 @@ const NavigationModule = {
             this.routeLayer = L.polyline([[startLat, startLng], [destLat, destLng]], { color: '#3b82f6', weight: 4, dashArray: '5, 10' }).addTo(map);
             map.fitBounds(this.routeLayer.getBounds(), { padding: [40, 40] });
         }
-    },
-
-    // 6. Simulasi Perjalanan Live ke SMAN 5
-    async simulateTripToSchool() {
-        const map = MapView.map;
-        if (!map) return;
-
-        if (this.simulationTimer) {
-            clearInterval(this.simulationTimer);
-            this.simulationTimer = null;
-            if (this.simulatedMarker) map.removeLayer(this.simulatedMarker);
-            App.showToast("⏹️ Simulasi perjalanan dihentikan.");
-            return;
-        }
-
-        const start = this.userCoords || [SEKOLAH_DATA.lat, SEKOLAH_DATA.lng];
-        const dest = [SEKOLAH_DATA.lat, SEKOLAH_DATA.lng];
-        App.showToast("🚀 Menyiapkan rute simulasi ke SMAN 5 Surabaya...");
-
-        try {
-            const url = `https://router.project-osrm.org/route/v1/driving/${start[1]},${start[0]};${dest[1]},${dest[0]}?overview=full&geometries=geojson`;
-            const res = await fetch(url);
-            const data = await res.json();
-            let routeCoords = (data.routes && data.routes.length > 0)
-                ? data.routes[0].geometry.coordinates.map(c => [c[1], c[0]])
-                : Array.from({length: 21}, (_, i) => [
-                    start[0] + (dest[0] - start[0]) * (i / 20),
-                    start[1] + (dest[1] - start[1]) * (i / 20)
-                ]);
-
-            if (this.routeLayer) map.removeLayer(this.routeLayer);
-            this.routeLayer = L.polyline(routeCoords, { color: '#10b981', weight: 6 }).addTo(map);
-            map.fitBounds(this.routeLayer.getBounds(), { padding: [50, 50] });
-
-            const simIcon = L.divIcon({
-                className: 'custom-pin',
-                html: '<div class="marker-pin marker-driver" style="font-size:18px;width:36px;height:36px;box-shadow:0 0 15px #10b981;">🛵</div>',
-                iconSize: [36, 36], iconAnchor: [18, 18]
-            });
-            this.simulatedMarker = L.marker(routeCoords[0], { icon: simIcon }).addTo(map);
-            this.simulatedMarker.bindPopup("<b>🛵 Menuju SMAN 5 Surabaya</b><br>Kecepatan: ~35 km/jam").openPopup();
-            let step = 0;
-            this.simulationTimer = setInterval(() => {
-                step++;
-                if (step >= routeCoords.length) {
-                    clearInterval(this.simulationTimer); this.simulationTimer = null;
-                    this.simulatedMarker.setLatLng(dest);
-                    this.simulatedMarker.bindPopup("<b>🎉 Tiba di Gerbang SMAN 5!</b><br>Tepat Waktu!").openPopup();
-                    App.showToast("🎉 Siswa telah tiba di SMAN 5 Surabaya!");
-                    return;
-                }
-                this.simulatedMarker.setLatLng(routeCoords[step]);
-            }, 600);
-        } catch (e) { App.showToast("⚠️ Gagal memuat simulasi rute."); }
     }
 };
 
@@ -285,8 +229,7 @@ const MapManager = {
     centerToUser() { NavigationModule.centerToUser(); },
     toggleLocationPicker() { NavigationModule.toggleLocationPicker(); },
     routeToDestination(lat, lng, name) { NavigationModule.routeToDestination(lat, lng, name); },
-    getDistanceKm(lat1, lon1, lat2, lon2) { return NavigationModule.getDistanceKm(lat1, lon1, lat2, lon2); },
-    simulateTripToSchool() { NavigationModule.simulateTripToSchool(); }
+    getDistanceKm(lat1, lon1, lat2, lon2) { return NavigationModule.getDistanceKm(lat1, lon1, lat2, lon2); }
 };
 
 if (typeof window !== 'undefined') {

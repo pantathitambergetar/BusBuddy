@@ -212,8 +212,6 @@ const RidesModule = {
         return this.requestRide(studentId, true);
     },
 
-    openWhatsAppChat(studentId) { this.offerRideTo(studentId); },
-
     // Modal popup tombol besar WhatsApp
     showWaModal(namaB, waLink, text, id, appUrl) {
         let el = document.getElementById('waRideModal');

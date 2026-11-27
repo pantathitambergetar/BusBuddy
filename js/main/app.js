@@ -228,7 +228,6 @@ const App = {
     searchNearestRide() { RidesModule.searchNearestRide(); },
     requestRide(id) { RidesModule.requestRide(id); },
     offerRideTo(id) { RidesModule.offerRideTo(id); },
-    openWhatsAppChat(id) { RidesModule.openWhatsAppChat(id); },
     finishNebeng(id) { RidesModule.finishNebeng(id); },
 
     renderDeveloperTools() { AdminModule.renderDeveloperTools(); },

@@ -128,16 +128,7 @@ const ApiService = {
         return null;
     },
 
-    async saveRequest(req) {
-        if (!this.isOnline) return false;
-        const res = await this._fetch('/requests', {
-            method: 'POST',
-            body: JSON.stringify(req)
-        });
-        return res.success;
-    },
-
-    // 4. Autentikasi Langsung ke MySQL
+    // 4. Autentikasi Langsung ke PostgreSQL
     async login(identifier, password) {
         if (!this.isOnline) return null;
         return await this._fetch('/auth/login', {
@@ -146,36 +137,7 @@ const ApiService = {
         });
     },
 
-    // 5. Migrasi & Sinkronisasi
-    async importMigration(students, teachers, requests) {
-        if (!this.isOnline) return { success: false, message: 'Server offline' };
-        return await this._fetch('/migrate/import', {
-            method: 'POST',
-            body: JSON.stringify({ students, teachers, requests })
-        });
-    },
-
-    async importGoogleSheetStudents() {
-        if (this.isOnline) {
-            const res = await this._fetch('/students/import-sheet', { method: 'POST' });
-            if (res.success && res.data) {
-                StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, res.data);
-                return { success: true, count: res.data.length, data: res.data, inMySQL: true };
-            }
-        }
-        try {
-            const res = await fetch('server/students_xii_1.json');
-            if (res.ok) {
-                const data = await res.json();
-                StorageManager.saveCollection(StorageManager.KEYS.STUDENTS, data);
-                return { success: true, count: data.length, data: data, inMySQL: false };
-            }
-        } catch (e) {
-            console.warn('Fallback JSON fetch failed:', e);
-        }
-        return { success: false, message: 'Gagal memuat file students_xii_1.json.' };
-    },
-
+    // 5. Sinkronisasi Data Realtime
     async syncAll() {
         if (!this.isOnline) await this.checkServer();
         if (!this.isOnline) return;

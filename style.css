@@ -268,56 +268,10 @@ body {
     gap: 10px;
 }
 
-.student-avatar {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #e2e8f0;
-}
-
 .student-name {
     font-size: 14px;
     font-weight: 700;
     color: var(--text-main);
-}
-
-.student-class {
-    font-size: 12px;
-    color: var(--text-muted);
-}
-
-.badge-tag {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 3px 8px;
-    border-radius: 12px;
-    text-transform: uppercase;
-}
-
-.badge-driver {
-    background: #dcfce7;
-    color: #15803d;
-}
-
-.badge-passenger {
-    background: #e0f2fe;
-    color: #0369a1;
-}
-
-.student-body {
-    font-size: 12px;
-    color: var(--text-muted);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin: 8px 0 12px 0;
-}
-
-.student-body .item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
 }
 
 .student-actions {
@@ -369,16 +323,6 @@ body {
 
 .btn-secondary:hover {
     background: #e2e8f0;
-}
-
-.btn-sos {
-    background: var(--accent-sos);
-    color: white;
-    font-weight: 700;
-}
-
-.btn-sos:hover {
-    background: #dc2626;
 }
 
 /* ==============================================================================
@@ -462,12 +406,6 @@ body {
     font-size: 18px;
 }
 
-.marker-driver {
-    background: linear-gradient(135deg, #10b981, #059669);
-    width: 32px;
-    height: 32px;
-}
-
 .marker-passenger {
     background: linear-gradient(135deg, #0284c7, #0369a1);
     width: 32px;
@@ -478,15 +416,6 @@ body {
     background: linear-gradient(135deg, #8b5cf6, #6d28d9);
     width: 30px;
     height: 30px;
-}
-
-.marker-gps-user {
-    background: #10b981;
-    width: 18px;
-    height: 18px;
-    border-radius: 50%;
-    border: 3px solid white;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
 }
 
 /* ==============================================================================
@@ -625,49 +554,7 @@ body {
 }
 
 /* ==============================================================================
-   8. QUICK DEMO LOGIN CARDS (Siswa, Guru, Developer)
-   ============================================================================== */
-.quick-login-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.quick-login-card {
-    background: #f8fafc;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    touch-action: manipulation;
-}
-
-.quick-login-card:hover {
-    border-color: var(--primary-light);
-    background: #eff6ff;
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-sm);
-}
-
-.quick-login-icon {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    background: white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-/* ==============================================================================
-   9. FULLSCREEN AUTH GATEKEEPER SCREEN (Login / Sign In Sebelum Map)
+   8. FULLSCREEN AUTH GATEKEEPER SCREEN (Login / Sign In Sebelum Map)
    ============================================================================== */
 .auth-gatekeeper {
     position: fixed;
@@ -816,8 +703,7 @@ body {
         display: inline-block;
     }
 
-    .role-badge .badge-user-role,
-    .role-badge .badge-user-id {
+    .role-badge .badge-user-role {
         display: none;
     }
 
