@@ -4,30 +4,33 @@
    ============================================================================== */
 
 :root {
-    --primary: #132d54;        /* Navy SMAN 5 Surabaya (WCAG AAA dgn putih) */
-    --primary-hover: #0c1f3d;
-    --primary-light: #2563eb;
+    --primary: #1d4ed8;        /* Royal Blue Cerah & Enerjik */
+    --primary-hover: #1e40af;
+    --primary-light: #3b82f6;
     --primary-soft: #eff6ff;
-    --accent-teal: #0f766e;    /* Transit Teal (Nebeng / Driver, >=5.4:1 dgn putih) */
-    --accent-teal-hover: #115e59;
+    --accent-amber: #fbbf24;   /* Kuning Cerah Bus Sekolah */
+    --accent-amber-soft: #fef3c7;
+    --accent-amber-text: #92400e;
+    --accent-teal: #047857;    /* Emerald Segar (>=5.4:1 dgn putih) */
+    --accent-teal-hover: #065f46;
     --accent-wa: #15803d;      /* WhatsApp Green (>=5.1:1 dgn putih) */
     --accent-wa-hover: #166534;
-    --accent-school: #b45309;  /* Amber Sekolah */
-    --accent-sos: #b91c1c;     /* Crimson Darurat (>=6.4:1 dgn putih) */
-    --accent-sos-hover: #991b1b;
-    --bg-light: #f4f6f9;
+    --accent-school: #d97706;  /* Amber Sekolah */
+    --accent-sos: #dc2626;     /* Merah Darurat Terang (>=4.8:1 dgn putih) */
+    --accent-sos-hover: #b91c1c;
+    --bg-light: #f0f6ff;       /* Latar Biru Langit Sangat Lembut */
     --bg-card: #ffffff;
-    --bg-subtle: #eef2f6;
+    --bg-subtle: #e6effc;
     --text-main: #0f172a;
     --text-secondary: #334155;
-    --text-muted: #526075;     /* >=5.7:1 di atas putih */
-    --border-color: #dce3ec;
-    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
-    --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.1);
-    --shadow-lg: 0 14px 32px rgba(15, 23, 42, 0.16);
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 18px;
+    --text-muted: #475569;
+    --border-color: #d3e0f3;
+    --shadow-sm: 0 2px 6px rgba(29, 78, 216, 0.07);
+    --shadow-md: 0 6px 16px rgba(29, 78, 216, 0.11);
+    --shadow-lg: 0 16px 36px rgba(15, 23, 42, 0.14);
+    --radius-sm: 10px;
+    --radius-md: 14px;
+    --radius-lg: 20px;
     --font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
@@ -100,15 +103,16 @@ body {
 }
 
 .brand-icon {
-    width: 36px;
-    height: 36px;
-    background: var(--primary);
-    color: #ffffff;
+    width: 38px;
+    height: 38px;
+    background: var(--accent-amber);
+    color: #1e3a8a;
     border-radius: var(--radius-sm);
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
 }
 
 .brand-title {
@@ -280,19 +284,20 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    padding: 4px 9px;
+    padding: 4px 10px;
     font-size: 11px;
-    font-weight: 600;
-    background: var(--primary-soft);
-    color: var(--primary);
-    border: 1px solid #bfdbfe;
-    border-radius: var(--radius-sm);
+    font-weight: 700;
+    background: var(--accent-amber-soft);
+    color: var(--accent-amber-text);
+    border: 1px solid #fcd34d;
+    border-radius: 99px;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .btn-nearest:hover {
-    background: #dbeafe;
+    background: #fde68a;
+    transform: translateY(-1px);
 }
 
 .filter-chips {
@@ -325,10 +330,10 @@ body {
 }
 
 .info-banner {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    background: var(--primary-soft);
+    border: 1px solid #bfdbfe;
     border-radius: var(--radius-md);
-    padding: 12px;
+    padding: 12px 14px;
     margin-bottom: 12px;
     font-size: 12px;
     line-height: 1.45;
@@ -507,8 +512,18 @@ body {
 }
 
 .fab-pickup {
-    border-color: #99f6e4;
+    border-color: #6ee7b7;
     color: var(--accent-teal);
+}
+
+.fab-btn[onclick*="centerToUser"] {
+    border-color: #93c5fd;
+    color: var(--primary);
+}
+
+.fab-btn[onclick*="toggleTransport"] {
+    border-color: #fcd34d;
+    color: var(--accent-amber-text);
 }
 
 .fab-sos {
@@ -794,11 +809,11 @@ body {
 .auth-gatekeeper {
     position: fixed;
     inset: 0;
-    background-color: #eef2f7;
+    background-color: #e0f2fe;
     background-image:
-        linear-gradient(to right, rgba(19, 45, 84, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(19, 45, 84, 0.05) 1px, transparent 1px);
-    background-size: 28px 28px;
+        radial-gradient(circle at 12% 18%, rgba(251, 191, 36, 0.35) 0%, transparent 42%),
+        radial-gradient(circle at 88% 82%, rgba(56, 189, 248, 0.35) 0%, transparent 45%),
+        radial-gradient(circle at 80% 15%, rgba(52, 211, 153, 0.22) 0%, transparent 38%);
     z-index: 99999;
     display: flex;
     flex-direction: column;
@@ -811,12 +826,12 @@ body {
 
 .auth-card {
     background: var(--bg-card);
-    border: 1px solid var(--border-color);
+    border: 1px solid #cde0f5;
     width: 100%;
     max-width: 440px;
     margin: auto 0;
-    border-radius: 14px;
-    box-shadow: var(--shadow-lg);
+    border-radius: 18px;
+    box-shadow: 0 20px 44px rgba(29, 78, 216, 0.14);
     overflow: hidden;
     animation: auth-fade 0.25s ease-out;
     flex-shrink: 0;
@@ -829,8 +844,9 @@ body {
 
 .auth-header {
     background: var(--primary);
+    border-bottom: 4px solid var(--accent-amber);
     color: #ffffff;
-    padding: 20px 22px;
+    padding: 22px 22px 18px;
 }
 
 .auth-brand-row {
@@ -840,27 +856,28 @@ body {
 }
 
 .auth-header-icon {
-    width: 42px;
-    height: 42px;
-    background: rgba(255, 255, 255, 0.14);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    background: var(--accent-amber);
+    color: #1e3a8a;
+    border-radius: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
 }
 
 .auth-header-text h2 {
-    font-size: 18px;
-    font-weight: 700;
+    font-size: 19px;
+    font-weight: 800;
     letter-spacing: -0.01em;
     margin-bottom: 2px;
 }
 
 .auth-header-text p {
     font-size: 12px;
-    color: #cbd5e1;
+    color: #dbeafe;
 }
 
 .auth-location-pill {
@@ -868,12 +885,12 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    background: rgba(255, 255, 255, 0.12);
-    padding: 4px 10px;
+    background: rgba(255, 255, 255, 0.16);
+    padding: 5px 11px;
     border-radius: 99px;
     font-size: 11px;
     font-weight: 600;
-    color: #f1f5f9;
+    color: #ffffff;
 }
 
 .auth-tabs {
