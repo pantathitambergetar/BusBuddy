@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.js": {
-      "includeFiles": "index.html,style.css,js/**,nebeng.html,lib/**,server/**"
+      "includeFiles": "index.html,style.css,assets/**,js/**,nebeng.html,lib/**,server/**"
     }
   },
   "rewrites": [
