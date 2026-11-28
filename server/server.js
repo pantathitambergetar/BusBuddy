@@ -139,6 +139,10 @@ app.get('/index.html', (req, res) => {
 app.get('/style.css', (req, res) => {
     res.sendFile(path.join(rootDir, 'style.css'));
 });
+app.get('/assets/bus-bg.jpg', (req, res) => {
+    res.sendFile(path.join(rootDir, 'assets', 'bus-bg.jpg'));
+});
+app.use('/assets', express.static(path.join(rootDir, 'assets')));
 app.use('/js', express.static(path.join(rootDir, 'js')));
 app.use('/lib', express.static(path.join(rootDir, 'lib')));
 
