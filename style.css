@@ -138,8 +138,49 @@ body {
     transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.brand-section:hover .brand-icon {
-    transform: rotate(-4deg) scale(1.06);
+.brand-section:hover .brand-icon,
+.brand-section:hover .brand-logo-img {
+    transform: rotate(-3deg) scale(1.05);
+}
+
+.brand-logo-img {
+    height: 30px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.auth-logo-img {
+    height: 34px;
+    width: auto;
+    object-fit: contain;
+    flex-shrink: 0;
+    animation: bus-float 3.2s ease-in-out infinite;
+}
+
+.brand-wordmark-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.brand-text-img {
+    height: 22px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+.brand-text-img-sm {
+    height: 18px;
+}
+
+.btn-text-img {
+    height: 16px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) saturate(100%) invert(13%) sepia(36%) saturate(1500%) hue-rotate(191deg) brightness(93%) contrast(94%);
 }
 
 .brand-title {

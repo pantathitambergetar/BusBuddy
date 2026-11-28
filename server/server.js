@@ -142,6 +142,12 @@ app.get('/style.css', (req, res) => {
 app.get('/assets/bus-bg.jpg', (req, res) => {
     res.sendFile(path.join(rootDir, 'assets', 'bus-bg.jpg'));
 });
+app.get('/assets/busbuddy-logo.png', (req, res) => {
+    res.sendFile(path.join(rootDir, 'assets', 'busbuddy-logo.png'));
+});
+app.get('/assets/busbuddy-text.png', (req, res) => {
+    res.sendFile(path.join(rootDir, 'assets', 'busbuddy-text.png'));
+});
 app.use('/assets', express.static(path.join(rootDir, 'assets')));
 app.use('/js', express.static(path.join(rootDir, 'js')));
 app.use('/lib', express.static(path.join(rootDir, 'lib')));
